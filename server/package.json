@@ -1,0 +1,31 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "./build/index.js",
+  "scripts": {
+    "test": "cross-env NODE_ENV=test jest",
+    "tsc": "tsc",
+    "dev": "cross-env NODE_ENV=development tsx watch src/index.ts",
+    "build": "tsc",
+    "lint": "eslint .",
+    "start": "cross-env NODE_ENV=production node build/index.js"
+  },
+  "devDependencies": {
+    "@tsconfig/node22": "^22.0.1",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.14.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0"
+  }
+}
