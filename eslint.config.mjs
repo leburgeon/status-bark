@@ -10,7 +10,7 @@ export default tseslint.config(
   tseslint.configs.stylistic,
   {
     // Client-specific configuration
-    files: ['client/src/*.{ts,tsx}'],
+    files: ['client/src/**/*.{ts,tsx}'],
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
@@ -32,7 +32,7 @@ export default tseslint.config(
   },
   {
     // Server-specific configuration
-    files: ['server/src/*.{ts,tsx}'],
+    files: ['server/src/**/*.{ts,tsx}'],
     languageOptions: {
       parserOptions: {
         project: './server/tsconfig.json',

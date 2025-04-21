@@ -1,15 +1,17 @@
 {
   "name": "status-bark",
+  "private":true,
+  "workspaces": [
+    "client",
+    "server",
+    "shared"
+  ],
   "version": "1.0.0",
   "description": "Simple SaaS app for monitoring the health of your public-facing urls, and altering you if anything goes down!",
   "homepage": "https://github.com/leburgeon/status-bark#readme",
   "bugs": {
     "url": "https://github.com/leburgeon/status-bark/issues"
   },
-  "workspaces": [
-    "client",
-    "server"
-  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/leburgeon/status-bark.git"

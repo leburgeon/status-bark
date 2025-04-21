@@ -21,6 +21,6 @@ const App = () => {
     perfAsync()
   }, [])
   return (<>
-  {pong}!!</>)
+  {pong}!!!!</>)
 }
 export default App
