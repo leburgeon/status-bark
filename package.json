@@ -1,6 +1,6 @@
 {
   "name": "status-bark",
-  "private":true,
+  "private": true,
   "workspaces": [
     "client",
     "server",
@@ -22,14 +22,18 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build:full": "cd client && npm run build && cd ../server && npm run build",
-    "dev": "concurrently -k \"npm --prefix client run dev\" \"npm --prefix server run dev\""
+    "build": "cd client && npm run build && cd ../server && npm run build",
+    "dev": "concurrently -k \"npm --prefix client run dev\" \"npm --prefix server run dev\"",
+    "lint": "eslint ."
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
     "eslint": "^9.25.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^16.0.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.3",
     "typescript-eslint": "^8.30.1"
   },
   "dependencies": {
