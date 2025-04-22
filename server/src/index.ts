@@ -1,17 +1,19 @@
-import express from 'express'
-import cors from 'cors'
 import logger from './utils/logger.js'
+import config from './utils/config.js'
+import app from './app.js'
+import mongoose from 'mongoose'
 
-const app = express()
+logger.info(`starting server in ${process.env.NODE_ENV} environemnt`)
 
-app.use(cors())
+try {
+  logger.info('connecting to MongoDB...')
+  await mongoose.connect(config.MONGODB_URL)
+  logger.info('connected to database')
+} catch (error) {
+  logger.error('Error connecting to MongoDB', error)
+  throw error
+}
 
-app.use(express.static('../client/dist'))
-
-app.use('/api/ping', (_req, res) => {
-  res.send('pong')
-})
-
-app.listen(3000, () => {
+app.listen(config.PORT, () => {
   logger.info('Server listening on port 3000')
 })
