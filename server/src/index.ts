@@ -1,5 +1,6 @@
 import express from 'express'
 import cors from 'cors'
+import logger from './utils/logger.js'
 
 const app = express()
 
@@ -12,5 +13,5 @@ app.use('/api/ping', (_req, res) => {
 })
 
 app.listen(3000, () => {
-  console.log('Listening on port 3000')
+  logger.info('Server listening on port 3000')
 })
