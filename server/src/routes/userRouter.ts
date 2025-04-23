@@ -1,11 +1,12 @@
 import express, {NextFunction, Request, Response} from 'express'
 import { LoginCredentials, NewUser } from '../types/types.js'
 import User from '../models/User.js'
-import { parseLoginCredentials, parseNewUser } from '../utils/middlewear.js'
+import { authenticateAndExtractUser, parseLoginCredentials, parseNewUser } from '../utils/middlewear.js'
 import { passwordIsStrong } from '../utils/helpers.js'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import config from '../utils/config.js'
+import logger from '../utils/logger.js'
 
 const userRouter = express.Router()
 
@@ -40,8 +41,8 @@ userRouter.post('/register', parseNewUser, async (req: Request<unknown, unknown,
   }
 })
 
-// TODO: route for logging in and authenticating
-userRouter.post('/login', parseLoginCredentials, async (req: Request<unknown, unknown, LoginCredentials>, res: Response, next: NextFunction) => {
+// Route for logging in and returning an auth token
+userRouter.post('/login', parseLoginCredentials, async (req: Request<unknown, unknown, LoginCredentials>, res: Response, _next: NextFunction) => {
   const { email, password } = req.body
 
   // Finds the user with that email
@@ -54,11 +55,21 @@ userRouter.post('/login', parseLoginCredentials, async (req: Request<unknown, un
   }
 
   // Generates a JWT and returns it
-  const token = jwt.sign({email}, config.JWT_SECRET, {expiresIn: 60 * 60})
+  const token = jwt.sign({email, id: user._id.toString()}, config.JWT_SECRET, {expiresIn: 60 * 60})
   res.status(200).json({token})
 })
 
-// TODO: Route for deleting a user
-  // Must delele all associated user data
+// Route for deleting a user
+userRouter.delete('', authenticateAndExtractUser, async (req: Request, res: Response, next: NextFunction) => {
+  console.log('hototo')
+  logger.debug('got here')
+  try {
+    await User.findByIdAndDelete(req.user?._id)
+    res.status(204).end()
+    return
+  } catch (error){
+    next(error)
+  }
+})
 
 export default userRouter

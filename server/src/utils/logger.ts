@@ -6,10 +6,12 @@ const transports: winston.transport[] = []
 
 // Adds the console transport if in development mode
 if (process.env.NODE_ENV === 'development'){
-  transports.push(new winston.transports.Console({format: winston.format.combine(
-    winston.format.colorize(),
-    winston.format.simple()
-  )}))
+  transports.push(new winston.transports.Console({
+    level: 'debug',
+    format: winston.format.combine(
+      winston.format.colorize(),
+      winston.format.simple())
+  }))
 }
 
 // Adds console transport for production mode, fly captures the logs

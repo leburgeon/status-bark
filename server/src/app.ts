@@ -2,8 +2,19 @@ import express from 'express'
 import cors from 'cors'
 import userRouter from './routes/userRouter.js'
 import { errorHandler, requestLogger } from './utils/middlewear.js'
+import logger from './utils/logger.js'
+import mongoose from 'mongoose'
+import config from './utils/config.js'
 
 const app = express()
+
+try {
+  logger.info('connecting to MongoDB...')
+  await mongoose.connect(config.MONGODB_URL)
+  logger.info('connected to database')
+} catch (error) {
+  logger.error('Error connecting to MongoDB', error)
+}
 
 app.use(cors())
 

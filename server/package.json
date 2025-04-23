@@ -7,10 +7,11 @@
   "type": "module",
   "main": "./build/index.js",
   "scripts": {
-    "test": "cross-env NODE_ENV=test jest",
+    "test": "npm run build && cross-env NODE_ENV=test node --test",
     "tsc": "tsc",
     "dev": "cross-env NODE_ENV=development tsx watch src/index.ts",
-    "build": "tsc",
+    "clean": "rimraf build",
+    "build": "npm run clean && tsc",
     "lint": "eslint .",
     "start": "cross-env NODE_ENV=production node build/index.js"
   },
@@ -21,6 +22,8 @@
     "@types/jsonwebtoken": "^9.0.9",
     "@types/mongoose": "^5.11.96",
     "@types/node": "^22.14.1",
+    "@types/supertest": "^6.0.3",
+    "supertest": "^7.1.0",
     "tsx": "^4.19.3",
     "typescript": "^5.8.3"
   },
@@ -33,6 +36,7 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.13.2",
+    "rimraf": "^6.0.1",
     "winston": "^3.17.0",
     "zod": "^3.24.3"
   }

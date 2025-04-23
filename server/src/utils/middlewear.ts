@@ -34,6 +34,7 @@ export const authenticateAndExtractUser = async (req: Request, res: Response, ne
   // If the token does not exist or uses the wrong schema, returns error response
   if (!authorisation || !authorisation.startsWith('Bearer')){
     res.status(401).json({error: 'Please authenticate with bearer scheme'})
+    return
   } else {
     try {
       // Extracts just the token
@@ -46,10 +47,12 @@ export const authenticateAndExtractUser = async (req: Request, res: Response, ne
       // Attempts to find the authenticated user
       const user = await User.findById(payload.id)
       if (!user){
-        throw new Error('user not found')
+        res.status(401).json({error: 'Invalid token, please re-login'})
+        return
       }
-
-      req.user = user 
+      // Adds the use document to the request body
+      req.user = user
+      next()
     } catch (error) {
       next(error)
     }
@@ -72,5 +75,8 @@ export const errorHandler = (error: unknown, _req: Request, res: Response, _next
   } else if (error instanceof MongooseError){
     logger.error(`Mongoose error: ${error.message}`, error)
     res.status(500).json(error)
+  } else {
+    logger.error('UNHANDLED ERROR IN EXPRESS', error)
+    res.status(500).json({error: 'Internal Server Error'})
   }
 }
