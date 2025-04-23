@@ -1,16 +1,25 @@
 import dotenv from 'dotenv'
 dotenv.config()
 
-const PORT = process.env.PORT
-if (typeof PORT !== 'string'){
-  throw new Error('PORT not defined')
+// For ensuring an environment variable is defined, and throwing an error if not
+const getEnvVariable = (key: string): string => {
+  const value = process.env[key]
+  if (typeof value !== 'string'){
+    throw new Error(`${key} is not defined`)
+  }
+  return value
 }
+
+const PORT = getEnvVariable('PORT')
 
 const MONGODB_URL = process.env.NODE_ENV === 'test'
-  ? process.env.TEST_MONGODB_URL
-  : process.env.MONGODB_URL
-if (typeof MONGODB_URL !== 'string'){
-  throw new Error('PORT not defined')
-}
+  ? getEnvVariable('TEST_MONGODB_URL')
+  : getEnvVariable('MONGODB_URL')
 
-export default {PORT,MONGODB_URL}
+const JWT_SECRET = getEnvVariable('JWT_SECRET')
+
+export default {
+  PORT,
+  MONGODB_URL,
+  JWT_SECRET
+}

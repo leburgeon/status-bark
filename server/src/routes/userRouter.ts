@@ -1,9 +1,11 @@
 import express, {NextFunction, Request, Response} from 'express'
-import { NewUser } from '../types.js'
+import { LoginCredentials, NewUser } from '../types/types.js'
 import User from '../models/User.js'
-import { parseNewUser } from '../utils/middlewear.js'
+import { parseLoginCredentials, parseNewUser } from '../utils/middlewear.js'
 import { passwordIsStrong } from '../utils/helpers.js'
 import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken'
+import config from '../utils/config.js'
 
 const userRouter = express.Router()
 
@@ -36,6 +38,24 @@ userRouter.post('/register', parseNewUser, async (req: Request<unknown, unknown,
   } catch (error) {
     next(error)
   }
+})
+
+// TODO: route for logging in and authenticating
+userRouter.post('/login', parseLoginCredentials, async (req: Request<unknown, unknown, LoginCredentials>, res: Response, next: NextFunction) => {
+  const { email, password } = req.body
+
+  // Finds the user with that email
+  const user = await User.findOne({email})
+
+  // Returns an error if the email is not found or the password does not match the hash
+  if (!user || !await bcrypt.compare(password, user.passwordHash)){
+    res.status(401).json({error: 'The email/password combination was not correct'})
+    return
+  }
+
+  // Generates a JWT and returns it
+  const token = jwt.sign({email}, config.JWT_SECRET, {expiresIn: 60 * 60})
+  res.status(200).json({token})
 })
 
 // TODO: Route for deleting a user

@@ -1,16 +1,58 @@
 import { NextFunction, Request, Response } from 'express'
-import { NewUserSchema } from './validators.js'
-import { ZodError } from 'zod'
+import { JwtPayloadSchema, LoginCredentialsSchema, NewUserSchema } from './validators.js'
+import { ZodError, ZodSchema } from 'zod'
 import logger from './logger.js'
 import { MongooseError } from 'mongoose'
+import jwt from 'jsonwebtoken'
+import config from './config.js'
+import User from '../models/User.js'
+
+// Skeleton method for parsing a request body with a zod schema
+const parseRequestBodyWith = (schema: ZodSchema, req: Request, next: NextFunction) => {
+  try {
+    schema.parse(req.body)
+    next()
+  } catch (error) {
+    logger.error('Error parsing request body:', error)
+    next(error)
+  }
+}
 
 // Method for parsing new user information from a request body
 export const parseNewUser = (req: Request, _res: Response, next: NextFunction) => {
-  try {
-    NewUserSchema.parse(req.body)
-    next()
-  } catch (error) {
-    next(error)
+  parseRequestBodyWith(NewUserSchema, req, next)
+}
+
+// For parsing the login credentials from a request body
+export const parseLoginCredentials = (req: Request, _res: Response, next: NextFunction) => {
+  parseRequestBodyWith(LoginCredentialsSchema, req, next)
+}
+
+// For authenticating a user
+export const authenticateAndExtractUser = async (req: Request, res: Response, next: NextFunction) => {
+  const authorisation = req.get('Authorization')
+  // If the token does not exist or uses the wrong schema, returns error response
+  if (!authorisation || !authorisation.startsWith('Bearer')){
+    res.status(401).json({error: 'Please authenticate with bearer scheme'})
+  } else {
+    try {
+      // Extracts just the token
+      const token = authorisation.replace('Bearer ', '')
+      // Verifies the token and ensures not expired, will throw an error if not valid
+      const decoded = jwt.verify(token, config.JWT_SECRET)
+      // Parses the payload from the decoded token
+      const payload = JwtPayloadSchema.parse(decoded)
+
+      // Attempts to find the authenticated user
+      const user = await User.findById(payload.id)
+      if (!user){
+        throw new Error('user not found')
+      }
+
+      req.user = user 
+    } catch (error) {
+      next(error)
+    }
   }
 }
 
