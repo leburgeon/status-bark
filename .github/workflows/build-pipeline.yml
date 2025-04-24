@@ -8,7 +8,7 @@ jobs:
     env:
       PORT: ${{ secrets.PORT }}
       TEST_MONGODB_URL: ${{ secrets.TEST_MONGODB_URL }}
-      JWT_SECRET: 'fooooooooooasd22'
+      JWT_SECRET: 'fooooooooooa22'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
