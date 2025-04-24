@@ -11,8 +11,10 @@ const app = express()
 try {
   logger.info('connecting to MongoDB...')
   await mongoose.connect(config.MONGODB_URL)
+
   logger.info('connected to database')
 } catch (error) {
+  console.error('###########################',error)
   logger.error('Error connecting to MongoDB', error)
 }
 
