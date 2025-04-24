@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
-import { JwtPayloadSchema, LoginCredentialsSchema, NewUserSchema } from './validators.js'
+import { JwtPayloadSchema, LoginCredentialsSchema, NewMonitorSchema, NewUserSchema } from './validators.js'
 import { ZodError, ZodSchema } from 'zod'
 import logger from './logger.js'
 import { MongooseError } from 'mongoose'
@@ -26,6 +26,11 @@ export const parseNewUser = (req: Request, _res: Response, next: NextFunction) =
 // For parsing the login credentials from a request body
 export const parseLoginCredentials = (req: Request, _res: Response, next: NextFunction) => {
   parseRequestBodyWith(LoginCredentialsSchema, req, next)
+}
+
+// For parsing new monitor information from a request body
+export const parseNewMonitor = (req: Request, _res: Response, next: NextFunction) => {
+  parseRequestBodyWith(NewMonitorSchema, req, next)
 }
 
 // For authenticating a user

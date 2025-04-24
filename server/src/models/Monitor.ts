@@ -17,10 +17,8 @@ const monitorSchema = new Schema({
     type: String,
     enum: ['UP', 'DOWN', 'NOTCHECKED'],
     default: 'NOTCHECKED'
-  },
-  lastChecked: Date,
-  createdAt: Date,
-})
+  }
+}, {timestamps: true})
 
 export type MonitorType = InferSchemaType<typeof monitorSchema>
 export type MonitorDocument = HydratedDocument<MonitorType>

@@ -23,3 +23,9 @@ export const JwtPayloadSchema = z.object({
   id: ObjectIdSchema,
   email: z.string().email()
 })
+
+// Zod schema for a new monitor
+export const NewMonitorSchema = z.object({
+  url: z.string().url(),
+  interval: z.number()
+})
