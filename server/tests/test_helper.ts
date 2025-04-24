@@ -1,18 +1,15 @@
 import User from "../src/models/User.js"
 import bcrypt from "bcryptjs"
 
-// Password hash for initial users
-const passwordHash = await bcrypt.hash('SuperStrong1!', 8)
-
 // Initial users to add to the database
-const initialUsers: {email: string, passwordHash: string}[] = [
+const initialUsers: {email: string, password: string}[] = [
   {
     email: 'firstUser@email.com',
-    passwordHash
+    password: 'SuperStrong1!'
   },
   {
     email: 'secondUser@email.com',
-    passwordHash
+    password: 'SuperStrong1!'
   }
 ]
 
@@ -20,6 +17,16 @@ const initialUsers: {email: string, passwordHash: string}[] = [
 const userToAdd = {
   email: 'userToAdd@email.com',
   password: 'SuperStrong1!'
+}
+
+// For initialising the users
+const addInitialUsers = async () => {
+  const passwordHash = await bcrypt.hash('SuperStrong1!', 8)
+  const promises = initialUsers.map(data => {
+    const newUser = new User({email: data.email, passwordHash})
+    return newUser.save()
+  })
+  Promise.all(promises)
 }
 
 // For clearing the user data from the database
@@ -36,5 +43,6 @@ export default {
   clearUserData,
   initialUsers,
   userToAdd,
-  usersInDb
+  usersInDb,
+  addInitialUsers
  } 
