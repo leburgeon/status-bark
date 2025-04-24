@@ -5,6 +5,9 @@ on: [push, pull_request]
 jobs:
   ci: 
     runs-on: ubuntu-latest
+    env:
+      PORT: ${{ secrets.PORT }}
+      TEST_MONGODB_URL: ${{ secrets.TEST_MONGODB_URL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
