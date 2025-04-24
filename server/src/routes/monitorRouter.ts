@@ -1,9 +1,8 @@
 import express, {Request, Response, NextFunction} from 'express'
-import { authenticateAndExtractUser, parseNewMonitor } from '../utils/middlewear.js'
-import { NewMonitor } from '../types/types.js'
+import { authenticateAndExtractUser, parseMonitorIntervalUpdate, parseNewMonitor } from '../utils/middlewear.js'
+import { MonitorIntervalUpdate, NewMonitor } from '../types/types.js'
 import Monitor from '../models/Monitor.js'
 import { DeleteResult } from 'mongoose'
-import { error } from 'console'
 
 const monitorRouter = express.Router()
 
@@ -29,7 +28,7 @@ monitorRouter.post('', authenticateAndExtractUser, parseNewMonitor, async (req: 
 
   // Saves the new monitor
   try {
-    const newMonitor = new Monitor({url, interval})
+    const newMonitor = new Monitor({url, interval, user: req.user?._id.toString()})
     await newMonitor.save()
     res.status(201).json({data: 'Monitor added successfuly'})
   } catch (error) {
@@ -38,7 +37,7 @@ monitorRouter.post('', authenticateAndExtractUser, parseNewMonitor, async (req: 
 })
 
 // Route for deleting a monitor
-monitorRouter.delete('/:id', authenticateAndExtractUser, async (req: Request, res: Response, next: NextFunction) => {
+monitorRouter.delete('/:id', authenticateAndExtractUser, async (req: Request, res: Response, _next: NextFunction) => {
   const result: DeleteResult = await Monitor.deleteOne({_id: req.params.id, user: req.user?._id.toString()})
 
   // Returns error if not successful
@@ -49,9 +48,25 @@ monitorRouter.delete('/:id', authenticateAndExtractUser, async (req: Request, re
   }
 })
 
-// Modifying the interval
+// Route for modifying the interval
+monitorRouter.patch('/', authenticateAndExtractUser, parseMonitorIntervalUpdate, async (req: Request<unknown, unknown, MonitorIntervalUpdate>, res: Response, _next: NextFunction) => {
+  const {id, interval} = req.body
+  const intervalInteger = parseInt(interval)
+
+  // For updating the monitor with the new interval
+  const result = await Monitor.updateOne({_id: id, user: req.user?._id}, {$set: {interval: intervalInteger}})
+
+  // Checks that the monitor was modified
+  if (result.modifiedCount !== 1){
+    res.status(400).json({error: 'not updated'})
+  } else {
+    res.status(200).json({data: 'Monitor updated'})
+  }
+})
 
 // LATER:
 // Retrieving all the pings from that monitor
 
-// Must remove all data points associated with a monitor
+// Must remove all data points associated with a monitor when its deleted
+
+export default monitorRouter

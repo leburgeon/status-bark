@@ -5,6 +5,7 @@ import { errorHandler, requestLogger } from './utils/middlewear.js'
 import logger from './utils/logger.js'
 import mongoose from 'mongoose'
 import config from './utils/config.js'
+import monitorRouter from './routes/monitorRouter.js'
 
 const app = express()
 
@@ -35,6 +36,8 @@ app.use('/health', (_req, res) => {
 })
 
 app.use('/api/users', userRouter)
+
+app.use('/api/monitors', monitorRouter)
 
 // For handling errors passed to next funciton
 app.use(errorHandler)

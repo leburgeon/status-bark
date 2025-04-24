@@ -17,7 +17,8 @@ const monitorSchema = new Schema({
     type: String,
     enum: ['UP', 'DOWN', 'NOTCHECKED'],
     default: 'NOTCHECKED'
-  }
+  },
+  lastChecked: Date
 }, {timestamps: true})
 
 export type MonitorType = InferSchemaType<typeof monitorSchema>

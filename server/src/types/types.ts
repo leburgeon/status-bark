@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { LoginCredentialsSchema, NewMonitorSchema, NewUserSchema } from '../utils/validators.js'
+import { LoginCredentialsSchema, MonitorIntervalUpdateSchema, NewMonitorSchema, NewUserSchema } from '../utils/validators.js'
 
 // Type for registering user information
 export type NewUser = z.infer<typeof NewUserSchema>
@@ -9,3 +9,6 @@ export type LoginCredentials = z.infer<typeof LoginCredentialsSchema>
 
 // Type for a new monitor information
 export type NewMonitor = z.infer<typeof NewMonitorSchema>
+
+// Type for a monitor interval update
+export type MonitorIntervalUpdate = z.infer<typeof MonitorIntervalUpdateSchema>
