@@ -21,7 +21,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "cd server && npm run test",
     "build": "cd client && npm run build && cd ../server && npm run build",
     "dev": "concurrently -k \"npm --prefix client run dev\" \"npm --prefix server run dev\"",
     "lint": "eslint ."
