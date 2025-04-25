@@ -25,7 +25,6 @@ monitorRouter.post('', authenticateAndExtractUser, parseNewMonitor, async (req: 
     res.status(400).json({error: 'A monitor for this url already exists'})
     return
   }
-
   // Saves the new monitor
   try {
     const newMonitor = new Monitor({url, interval, user: req.user?._id.toString()})

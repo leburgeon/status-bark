@@ -9,6 +9,12 @@ import config from '../src/utils/config.js'
 
 const api = supertest(app)
 
+try {
+  await mongoose.connect(config.MONGODB_URL)
+} catch (error){
+  console.error('Error connecting to database', error)
+}
+
 test('app is healthy', async () => {
   await api
     .get('/health')
@@ -91,6 +97,48 @@ describe('When there are initially some users in the database', () => {
           .expect(401)
       })
     })
+  })
+
+  describe('and those users have monitors associated with them', () => {
+    // Adds the monitors for the users
+    beforeEach(async () => {
+      await helper.clearMonitorData()
+      await helper.addInitialMonitors()
+    })
+
+    describe('adding a new monitor...', () => {
+      test('works with valid data and login token', async () => {
+        const monitorsBefore = await helper.monitorsInDb()
+  
+        await api.post('/api/monitors')
+          .send(helper.monitorToAdd)
+          .auth(await helper.getBearerToken(), {type: 'bearer'})
+          .expect(201)
+        
+          const monitorsAfter = await helper.monitorsInDb()
+        
+        assert.strictEqual(monitorsAfter.length, monitorsBefore.length + 1)
+      })
+
+      // describe('fails with...', () => {
+      //   test('invalid url', async () => {
+      //     const monitorsBefore = await helper.monitorsInDb()
+
+      //     await helper.setLoginToken()
+    
+      //     await api.post('/api/monitors')
+      //       .send({url: 'invalid', })
+      //       .auth(helper.loginToken, {type: 'bearer'})
+      //       .expect(201)
+          
+      //       const monitorsAfter = await helper.monitorsInDb()
+          
+      //     assert.strictEqual(monitorsAfter.length, monitorsBefore.length + 1)
+      //   })
+      // })
+    })
+
+
   })
 })
 

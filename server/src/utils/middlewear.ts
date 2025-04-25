@@ -79,14 +79,16 @@ export const requestLogger = (req: Request, _res: Response, next: NextFunction) 
 }
 
 export const errorHandler = (error: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  logger.error(error)
   if (error instanceof ZodError){
-    logger.error('There was a zod error', error.issues)
     res.status(400).json(error)
   } else if (error instanceof MongooseError){
-    logger.error(`Mongoose error: ${error.message}`, error)
     res.status(500).json(error)
+  } else if (error instanceof jwt.JsonWebTokenError) {
+    res.status(400).json({error: error})
   } else {
     logger.error('UNHANDLED ERROR IN EXPRESS', error)
+    console.error(error)
     res.status(500).json({error: 'Internal Server Error'})
   }
 }

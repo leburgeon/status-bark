@@ -21,9 +21,6 @@ const userToAdd = {
   password: 'SuperStrong1!'
 }
 
-// For storing the first users login token
-let loginToken = 'foo'
-
 
 // Inital monitor data
 const initialMonitors: {url: string, interval: number}[] = [
@@ -74,8 +71,7 @@ const clearMonitorData = async () => {
 }
 
 // For initialising initial users with monitors
-const addInitialUsersWithMonitors = async () => {
-  await addInitialUsers()
+const addInitialMonitors = async () => {
   const firstUser = await User.findOne({email: initialUsers[0].email})
   await Monitor.insertMany(initialMonitors.map(monitor => {
     return {...monitor, user: firstUser?._id.toString()}
@@ -95,14 +91,16 @@ const monitorsInDb = async () => {
   return monitors
 }
 
+
+
 // For setting the login token for the test runner
-const setLoginToken = async () => {
+const getBearerToken = async () => {
   const { email } = initialUsers[0]
   const firstUser = await User.findOne({email})
   if (!firstUser){
     throw new Error('Error generating auth token: could not find first user')
   }
-  loginToken = generateJsonWebToken(email, firstUser._id.toString(), 60*60)
+  return generateJsonWebToken(email, firstUser._id.toString(), 60*60)
 }
 
 
@@ -116,7 +114,6 @@ export default {
   addInitialUsers,
   clearMonitorData,
   monitorsInDb,
-  addInitialUsersWithMonitors,
-  loginToken,
-  setLoginToken
+  addInitialMonitors,
+  getBearerToken
  } 
