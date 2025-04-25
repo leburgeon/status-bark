@@ -16,12 +16,9 @@ test('app is healthy', async () => {
     .expect('Content-Type', /text\/html/)
 })
 
-
-
 describe('When there are initially some users in the database', () => {
   // Initialises the database with users before each run
   beforeEach(async () => {
-    console.log('database ~~~~~')
     await helper.clearUserData()
     await helper.addInitialUsers()
   })
