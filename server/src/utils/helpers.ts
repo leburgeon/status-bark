@@ -8,7 +8,7 @@ export const passwordIsStrong = (password: string): boolean => {
 }
 
 // Method for generating a jsonwebtoken
-export const generateJsonWebToken = (email: string, timeoutInSeconds: number) => {
-  return jwt.sign({email}, config.JWT_SECRET, {expiresIn: timeoutInSeconds})
+export const generateJsonWebToken = (email: string, id: string, timeoutInSeconds: number) => {
+  return jwt.sign({email, id}, config.JWT_SECRET, {expiresIn: timeoutInSeconds})
 }
 

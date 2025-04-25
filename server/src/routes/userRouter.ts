@@ -4,9 +4,8 @@ import User from '../models/User.js'
 import { authenticateAndExtractUser, parseLoginCredentials, parseNewUser } from '../utils/middlewear.js'
 import { passwordIsStrong } from '../utils/helpers.js'
 import bcrypt from 'bcryptjs'
-import jwt from 'jsonwebtoken'
-import config from '../utils/config.js'
 import logger from '../utils/logger.js'
+import { generateJsonWebToken } from '../utils/helpers.js'
 
 const userRouter = express.Router()
 
@@ -55,7 +54,7 @@ userRouter.post('/login', parseLoginCredentials, async (req: Request<unknown, un
   }
 
   // Generates a JWT and returns it
-  const token = jwt.sign({email, id: user._id.toString()}, config.JWT_SECRET, {expiresIn: 60 * 60})
+  const token = generateJsonWebToken(email, user._id.toString(), 60 * 60)
   res.status(200).json({token})
 })
 
