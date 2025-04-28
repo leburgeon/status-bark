@@ -3,8 +3,7 @@
   "private": true,
   "workspaces": [
     "client",
-    "server",
-    "shared"
+    "server"
   ],
   "version": "1.0.0",
   "description": "Simple SaaS app for monitoring the health of your public-facing urls, and altering you if anything goes down!",
