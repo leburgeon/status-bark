@@ -1,7 +1,7 @@
-import Monitor from "../src/models/Monitor.js"
-import User from "../src/models/User.js"
+import Monitor from "../src/api/models/Monitor.js"
+import User from "../src/api/models/User.js"
 import bcrypt from "bcryptjs"
-import { generateJsonWebToken } from "../src/utils/helpers.js"
+import { generateJsonWebToken } from "../src/api/utils/helpers.js"
 
 // Initial users to add to the database
 const initialUsers: {email: string, password: string}[] = [

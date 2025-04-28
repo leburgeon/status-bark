@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from 'express'
 import { JwtPayloadSchema, LoginCredentialsSchema, MonitorIntervalUpdateSchema, NewMonitorSchema, NewUserSchema } from './validators.js'
 import { ZodError, ZodSchema } from 'zod'
-import logger from './logger.js'
+import logger from '../../utils/logger.js'
 import { MongooseError } from 'mongoose'
 import jwt from 'jsonwebtoken'
-import config from './config.js'
+import config from '../../utils/config.js'
 import User from '../models/User.js'
 
 // Skeleton method for parsing a request body with a zod schema

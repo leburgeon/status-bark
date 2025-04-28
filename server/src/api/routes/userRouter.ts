@@ -4,7 +4,7 @@ import User from '../models/User.js'
 import { authenticateAndExtractUser, parseLoginCredentials, parseNewUser } from '../utils/middlewear.js'
 import { passwordIsStrong } from '../utils/helpers.js'
 import bcrypt from 'bcryptjs'
-import logger from '../utils/logger.js'
+import logger from '../../utils/logger.js'
 import { generateJsonWebToken } from '../utils/helpers.js'
 
 const userRouter = express.Router()

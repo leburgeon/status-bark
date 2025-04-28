@@ -2,7 +2,7 @@ import express, {Request, Response, NextFunction} from 'express'
 import { authenticateAndExtractUser, parseMonitorIntervalUpdate, parseNewMonitor } from '../utils/middlewear.js'
 import { MonitorIntervalUpdate, NewMonitor } from '../types/types.js'
 import Monitor from '../models/Monitor.js'
-import logger from '../utils/logger.js'
+import logger from '../../utils/logger.js'
 import { isValidObjectId } from 'mongoose'
 
 const monitorRouter = express.Router()

@@ -1,6 +1,6 @@
 import { passwordStrength } from "check-password-strength";
 import jwt from 'jsonwebtoken'
-import config from "./config.js";
+import config from "../../utils/config.js";
 
 // Method for checking the strength of a password
 export const passwordIsStrong = (password: string): boolean => {

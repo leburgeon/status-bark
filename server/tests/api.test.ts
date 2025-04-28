@@ -1,6 +1,6 @@
 import {test, after, beforeEach, describe} from 'node:test'
 import assert from 'node:assert'
-import app from '../src/app.js'
+import app from '../src/api/app.js'
 import supertest from 'supertest'
 import mongoose from 'mongoose'
 import helper from './test_helper.js'
