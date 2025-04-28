@@ -2,7 +2,8 @@ import express, {Request, Response, NextFunction} from 'express'
 import { authenticateAndExtractUser, parseMonitorIntervalUpdate, parseNewMonitor } from '../utils/middlewear.js'
 import { MonitorIntervalUpdate, NewMonitor } from '../types/types.js'
 import Monitor from '../models/Monitor.js'
-import { DeleteResult } from 'mongoose'
+import logger from '../utils/logger.js'
+import { isValidObjectId } from 'mongoose'
 
 const monitorRouter = express.Router()
 
@@ -37,29 +38,67 @@ monitorRouter.post('', authenticateAndExtractUser, parseNewMonitor, async (req: 
 
 // Route for deleting a monitor
 monitorRouter.delete('/:id', authenticateAndExtractUser, async (req: Request, res: Response, _next: NextFunction) => {
-  const result: DeleteResult = await Monitor.deleteOne({_id: req.params.id, user: req.user?._id.toString()})
 
-  // Returns error if not successful
-  if (result.deletedCount !== 1){
-    res.status(400).json({error: 'Error deleting that monitor'})
-  } else {
-    res.status(410).json({data: 'Successfuly deleted'})
+  // Returns error response if inavalid object id
+  if (!isValidObjectId(req.params.id)){
+    res.status(400).json({error:'Invalid object id'})
+    return
   }
+
+  const monitorToDelete = await Monitor.findById(req.params.id)
+
+  // Returns the correct error response if the monitor not found
+  if (!monitorToDelete){
+    res.status(404).json({error: 'Couldnt find that monitor to delete'})
+    return
+  }
+
+  // If the user ids do not match, send unauthorised response
+  if (monitorToDelete.user.toString() !== req.user?._id.toString()){
+    res.status(401).json({error: 'Unauthorised'})
+    return
+  }
+
+  // Attempts to delete the 
+  try {
+    await Monitor.findByIdAndDelete(monitorToDelete._id.toString())
+    res.status(410).json({data: 'Successfuly deleted'})
+  } catch (error) {
+    logger.error('Error deleting a monitor', error)
+    res.status(500).json({error: 'Internal server error'})
+  }
+
 })
 
 // Route for modifying the interval
-monitorRouter.patch('/', authenticateAndExtractUser, parseMonitorIntervalUpdate, async (req: Request<unknown, unknown, MonitorIntervalUpdate>, res: Response, _next: NextFunction) => {
+monitorRouter.patch('', authenticateAndExtractUser, parseMonitorIntervalUpdate, async (req: Request<unknown, unknown, MonitorIntervalUpdate>, res: Response, next: NextFunction) => {
+
   const {id, interval} = req.body
   const intervalInteger = parseInt(interval)
 
   // For updating the monitor with the new interval
-  const result = await Monitor.updateOne({_id: id, user: req.user?._id}, {$set: {interval: intervalInteger}})
+  const monitorToUpdate = await Monitor.findById(id)
 
-  // Checks that the monitor was modified
-  if (result.modifiedCount !== 1){
-    res.status(400).json({error: 'not updated'})
-  } else {
-    res.status(200).json({data: 'Monitor updated'})
+  // Asserts that the monitor exists
+  if (!monitorToUpdate){
+    res.status(404).json({error: 'could not find monitor'})
+    return
+  }
+
+
+  // Checks that the user is authorised to perform update
+  if (monitorToUpdate.user.toString() !== req.user?._id.toString()){
+    res.status(401).json({error: 'Not authorised to access that data'})
+    return
+  }
+
+  // Attempts to update the monitor and returns the response
+  try {
+    monitorToUpdate.interval = intervalInteger
+    await monitorToUpdate.save()
+    res.status(200).json({data: {newInterval: intervalInteger}})
+  } catch (error){
+    next(error)
   }
 })
 
