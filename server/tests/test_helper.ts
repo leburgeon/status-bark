@@ -65,6 +65,16 @@ const usersInDb = async () => {
   return await User.find({})
 }
 
+// For retrieving a specific user from the database
+const getFirstUser = async () =>{
+  return await User.findOne({email: initialUsers[0].email})
+}
+
+// For retrieving the second user from the database
+const getSecondUser = async () =>{
+  return await User.findOne({email: initialUsers[1].email})
+}
+
 // For clearing the monitors from the database
 const clearMonitorData = async () => {
   await Monitor.deleteMany({})
@@ -91,16 +101,40 @@ const monitorsInDb = async () => {
   return monitors
 }
 
+// For returning a specific monitor of the first user
+const getSpecificFirstUserMonitor = async () => {
+  const firstUser = await getFirstUser()
+  if (!firstUser){
+    throw new Error('Error retrieving specific user')
+  }
+  const monitor = await Monitor.findOne({url: initialMonitors[0].url, user: firstUser._id.toString()})
+  if (!monitor){
+    throw new Error('Error retrieving monitor')
+  }
+  return monitor
+}
 
+// For returning a specific monitor of the second user
+const getSpecificSecondUserMonitor = async () => {
+  const secondUser = await getSecondUser()
+  if (!secondUser){
+    throw new Error('Error retrieving specific user')
+  }
+  const monitor = await Monitor.findOne({url: initialMonitors[0].url, user: secondUser._id.toString()})
+  if (!monitor){
+    throw new Error('Error retrieving monitor')
+  }
+  return monitor
+}
 
-// For setting the login token for the test runner
-const getBearerToken = async () => {
+// For getting the login token for the test runner
+const getBearerTokenOfFirstUser = async (expiryTimeInSeconds: number) => {
   const { email } = initialUsers[0]
   const firstUser = await User.findOne({email})
   if (!firstUser){
     throw new Error('Error generating auth token: could not find first user')
   }
-  return generateJsonWebToken(email, firstUser._id.toString(), 60*60)
+  return generateJsonWebToken(email, firstUser._id.toString(), expiryTimeInSeconds)
 }
 
 
@@ -115,5 +149,7 @@ export default {
   clearMonitorData,
   monitorsInDb,
   addInitialMonitors,
-  getBearerToken
+  getBearerTokenOfFirstUser,
+  getSpecificFirstUserMonitor,
+  getSpecificSecondUserMonitor
  } 

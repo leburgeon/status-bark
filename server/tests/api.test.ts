@@ -112,7 +112,7 @@ describe('When there are initially some users in the database', () => {
   
         await api.post('/api/monitors')
           .send(helper.monitorToAdd)
-          .auth(await helper.getBearerToken(), {type: 'bearer'})
+          .auth(await helper.getBearerTokenOfFirstUser(60*60), {type: 'bearer'})
           .expect(201)
         
           const monitorsAfter = await helper.monitorsInDb()
@@ -120,24 +120,138 @@ describe('When there are initially some users in the database', () => {
         assert.strictEqual(monitorsAfter.length, monitorsBefore.length + 1)
       })
 
-      // describe('fails with...', () => {
-      //   test('invalid url', async () => {
-      //     const monitorsBefore = await helper.monitorsInDb()
+      describe('fails with...', () => {
+        test('invalid url', async () => {
+          const monitorsBefore = await helper.monitorsInDb()
 
-      //     await helper.setLoginToken()
+          const token = await helper.getBearerTokenOfFirstUser(60*60)
     
-      //     await api.post('/api/monitors')
-      //       .send({url: 'invalid', })
-      //       .auth(helper.loginToken, {type: 'bearer'})
-      //       .expect(201)
+          await api.post('/api/monitors')
+            .send({url: 'invalid', })
+            .auth(token, {type: 'bearer'})
+            .expect(400)
           
-      //       const monitorsAfter = await helper.monitorsInDb()
+          const monitorsAfter = await helper.monitorsInDb()
           
-      //     assert.strictEqual(monitorsAfter.length, monitorsBefore.length + 1)
-      //   })
-      // })
+          assert.strictEqual(monitorsAfter.length, monitorsBefore.length)
+        })
+
+        test('invalid or expired token', async () => {
+          const monitorsBefore = await helper.monitorsInDb()
+
+          const expiredToken =  await helper.getBearerTokenOfFirstUser(0)
+
+          await api.post('/api/monitors')
+            .send(helper.monitorToAdd)
+            .auth(expiredToken, {type: 'bearer'})
+            .expect(400)
+
+          const monitorsAfter = await helper.monitorsInDb()
+        
+          assert.strictEqual(monitorsAfter.length, monitorsBefore.length)
+        })
+
+        test('duplicate url data', async () => {
+          const monitorsBefore = await helper.monitorsInDb()
+
+          const token = await helper.getBearerTokenOfFirstUser(60*60)
+    
+          await api.post('/api/monitors')
+            .send(helper.initialMonitors[0])
+            .auth(token, {type: 'bearer'})
+            .expect(400)
+          
+          const monitorsAfter = await helper.monitorsInDb()
+          
+          assert.strictEqual(monitorsAfter.length, monitorsBefore.length)
+        })
+      })
     })
 
+    describe('updating a monitors interval...', () => {
+      test('succeeds with a valid new interval', async () => {
+        const {interval: preInterval, _id: preId} = await helper.getSpecificFirstUserMonitor()
+        await api.patch('/api/monitors')
+          .send({id: preId.toString(), interval: '30'})
+          .auth(await helper.getBearerTokenOfFirstUser(60*60), {type: 'bearer'})
+          .expect(200)
+        const {interval: postInterval, _id: postId} = await helper.getSpecificFirstUserMonitor()
+        // Asserts that the id of the monitors to compare are the same
+        assert.strictEqual(postId.toString(), preId.toString())
+        // Asserts that the interval has changed
+        assert(postInterval !== preInterval)
+      })
+
+      describe('fails when...', () => {
+        test('attempting to update another users monitor', async () => {
+          const firstUserToken = await helper.getBearerTokenOfFirstUser(60*60)
+          const {interval: preInterval, _id: preId} = await helper.getSpecificSecondUserMonitor()
+  
+          await api.patch('/api/monitors')
+            .send({id: preId.toString(), interval: '30'})
+            .auth(firstUserToken, {type: 'bearer'})
+            .expect(401)
+  
+          const {interval: postInterval, _id: postId} = await helper.getSpecificSecondUserMonitor()
+  
+          assert.strictEqual(postId.toString(), preId.toString())
+          assert.strictEqual(postInterval, preInterval)
+        })
+  
+        test('using an invalid token', async () => {
+          const firstUserToken = await helper.getBearerTokenOfFirstUser(0)
+          const {interval: preInterval, _id: preId} = await helper.getSpecificFirstUserMonitor()
+  
+          await api.patch('/api/monitors')
+            .send({id: preId.toString(), interval: '30'})
+            .auth(firstUserToken, {type: 'bearer'})
+            .expect(400)
+  
+          const {interval: postInterval, _id: postId} = await helper.getSpecificFirstUserMonitor()
+  
+          assert.strictEqual(postId.toString(), preId.toString())
+          assert.strictEqual(postInterval, preInterval)
+        })
+      })
+    })
+
+    describe.only('attempting to delete a monitor...', () => {
+      test('succeeds with valid data', async () => {
+        const token = await helper.getBearerTokenOfFirstUser(60*60)
+        const monitorToDelete = await helper.getSpecificFirstUserMonitor()
+
+        const monitorsBefore = await helper.monitorsInDb()
+
+        await api.delete(`/api/monitors/${monitorToDelete._id.toString()}`)
+          .auth(token, {type: 'bearer'})
+          .expect(410)
+
+        const monitorsAfter = await helper.monitorsInDb()
+        assert.strictEqual(monitorsAfter.length, monitorsBefore.length - 1)
+      })
+
+      test('fails and returns 401 when attempting to delete another users monitor', async () => {
+        const token = await helper.getBearerTokenOfFirstUser(60*60)
+        const monitorToDelete = await helper.getSpecificSecondUserMonitor()
+
+        const monitorsBefore = await helper.monitorsInDb()
+
+        await api.delete(`/api/monitors/${monitorToDelete._id.toString()}`)
+          .auth(token, {type: 'bearer'})
+          .expect(401)
+
+        const monitorsAfter = await helper.monitorsInDb()
+        assert.strictEqual(monitorsAfter.length, monitorsBefore.length)
+      })
+
+      test('returns correct status and error with invalid object id', async () => {
+        const token = await helper.getBearerTokenOfFirstUser(60*60)
+
+        await api.delete('/api/monitors/123456788ghgh')
+          .auth(token, {type: 'bearer'})
+          .expect(400)
+      })
+    })
 
   })
 })
