@@ -17,7 +17,8 @@ monitorRouter.post('', authenticateAndExtractUser, parseNewMonitor, async (req: 
     return
   }
 
-  const { url, interval } = req.body
+  const { url, interval: intervalString } = req.body
+  const interval = parseInt(intervalString)
 
   // Ensures that the montior does not exist already in the monitors
   if (usersMonitors.some(monitor => {

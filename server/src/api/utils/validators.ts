@@ -27,7 +27,7 @@ export const JwtPayloadSchema = z.object({
 // Zod schema for a new monitor
 export const NewMonitorSchema = z.object({
   url: z.string().url(),
-  interval: z.coerce.number()
+  interval: z.enum(['5', '15', '30'])
 })
 
 // Zod schema for parsing a monitor interval update
