@@ -1,20 +1,25 @@
 import { CronJob } from "cron";
 import Monitor from "../api/models/Monitor.js";
+import { addHealthCheckToQueue } from "../queue/monitorQueue.js";
 
 // Job function
 const onTick = async () => {
+  console.log('searched for due monitors')
   const now = new Date()
   const monitorsDue = await Monitor.find({
     $expr: {
       $lte: ["$lastChecked", {$subtract: [{$literal: now}, {$multiply: ["$interval", 60 * 1000]}]}]
     }
   })
-  console.log(`${monitorsDue.length} found to check!`)
+  monitorsDue.forEach(async monitor => {
+    console.log('Added a job to the queue')
+    await addHealthCheckToQueue(monitor.url, monitor._id.toString())
+  })
 }
 
 // Every minute, checks for monitors that are due and adds to the queue
 export const scheduleHealthChecksJob = new CronJob(
-  '*/20 * * * * *',
+  '*/10 * * * * *',
   onTick,
   null,
   true

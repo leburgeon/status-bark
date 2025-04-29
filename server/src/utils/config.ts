@@ -18,8 +18,11 @@ const MONGODB_URL = process.env.NODE_ENV === 'test'
 
 const JWT_SECRET = getEnvVariable('JWT_SECRET')
 
+const UPSTASH_ENDPOINT = getEnvVariable('UPSTASH_ENDPOINT')
+
 export default {
   PORT,
   MONGODB_URL,
-  JWT_SECRET
+  JWT_SECRET,
+  UPSTASH_ENDPOINT
 }
