@@ -41,7 +41,7 @@ const initialMonitors: {url: string, interval: number}[] = [
 // Monitor info for adding a new monitor
 const monitorToAdd = {
   url: 'http://github.com',
-  interval: 5
+  interval: '5'
 }
 
 
