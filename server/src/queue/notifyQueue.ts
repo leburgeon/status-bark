@@ -12,10 +12,11 @@ const notificationQueue = new Queue(notificationQueueName, {connection})
 
 // Helper method for adding the discord notification to the queue
 export interface DiscordStatusChangeNotificationJobData {webHookUrl: string, url: string, oldStatus: urlStatus, newStatus:urlStatus}
+export const notifyDiscordOfStatusChangeJobName = 'notifyDiscordStatusChange'
 export const addDiscordStatusChangeNotificationJob = async (notificaitonData: DiscordStatusChangeNotificationJobData) => {
- console.log('discord notification job added to queue')
+ console.log('discord notification job added to queue from the helper')
  const {webHookUrl, url, oldStatus, newStatus} = notificaitonData
- await notificationQueue.add('notifyDiscordStatusChange', {
+ await notificationQueue.add(notifyDiscordOfStatusChangeJobName, {
     webHookUrl, 
     url, 
     oldStatus, 
