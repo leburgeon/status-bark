@@ -15,7 +15,7 @@ export const checkUrlStatus = async (url: string): Promise<{status: 'UP' | 'DOWN
   }
 }
 
-export const updateMonitorStatusAndReturnChanged = async (id: string, result: {status: 'UP' | 'DOWN', timeChecked: Date}): Promise<boolean> => {
+export const updateMonitorStatusAndReturnOldIfChanged = async (id: string, result: {status: 'UP' | 'DOWN', timeChecked: Date}): Promise<{status: 'UP' | 'DOWN' | 'NOTCHECKED', timeChecked: Date} | false> => {
   // Updates the status and the lastChecked field of the monitor
   const updateResult = await Monitor.findByIdAndUpdate(id, {lastChecked: result.timeChecked, lastStatus: result.status})
 
@@ -25,9 +25,10 @@ export const updateMonitorStatusAndReturnChanged = async (id: string, result: {s
   }
 
   // Checks if the status changed from the last check, returns true if it has
-  if (updateResult?.lastStatus !== result.status){
-    return true
+  if (updateResult.lastStatus !== result.status){
+    return {status: updateResult.lastStatus, timeChecked: updateResult.lastChecked}
   } else {
     return false
   }
 }
+
