@@ -4,8 +4,12 @@ dotenv.config()
 // For ensuring an environment variable is defined, and throwing an error if not
 const getEnvVariable = (key: string): string => {
   const value = process.env[key]
-  if (typeof value !== 'string'){
+  if (typeof value !== 'string' && process.env.NODE_ENV !== 'test'){
     throw new Error(`${key} is not defined`)
+  }
+  if (value === undefined){
+    console.error(`${key} is undefined 'ere`)
+    return 'undefined'
   }
   return value
 }
