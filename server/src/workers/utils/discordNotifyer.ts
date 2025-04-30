@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-interface urlStatus {status: string, timeChecked: Date}
+export interface urlStatus {status: string, timeChecked: Date}
 
 export const notifyDiscordOfStatusChange = async (url: string, oldStatus: urlStatus, newStatus: urlStatus, webHookUrl: string) => {
   await axios.post(webHookUrl, {
