@@ -38,6 +38,5 @@ const monitorWorker = new Worker(monitorQueueName, async (job) => {
 }, {autorun: false, connection})
 
 
-
 monitorWorker.run()
 console.log('started monitor worker')
