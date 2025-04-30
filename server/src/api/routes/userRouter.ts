@@ -18,7 +18,7 @@ userRouter.post('/register', parseNewUser, async (req: Request<unknown, unknown,
 
   // Returns error response if a user with that email exists already
   if (exists) {
-    res.status(400).json({error: 'Usr with that email already exists'})
+    res.status(400).json({error: 'User with that email already exists'})
     return 
   }
 
