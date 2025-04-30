@@ -39,6 +39,7 @@ const monitorSchema = new Schema({
   ]
 }, {timestamps: true})
 
+export type NotificationAddress = InferSchemaType<typeof notificationAddressSchema>
 export type MonitorType = InferSchemaType<typeof monitorSchema>
 export type MonitorDocument = HydratedDocument<MonitorType>
 

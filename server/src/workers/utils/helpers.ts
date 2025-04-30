@@ -1,5 +1,5 @@
 import axios from "axios"
-import Monitor from "../../api/models/Monitor.js"
+import Monitor, { NotificationAddress } from "../../api/models/Monitor.js"
 
 export const checkUrlStatus = async (url: string): Promise<{status: 'UP' | 'DOWN', timeChecked: Date}> => {
   const timeChecked = new Date()
@@ -15,7 +15,7 @@ export const checkUrlStatus = async (url: string): Promise<{status: 'UP' | 'DOWN
   }
 }
 
-export const updateMonitorStatusAndReturnOldIfChanged = async (id: string, result: {status: 'UP' | 'DOWN', timeChecked: Date}): Promise<{status: 'UP' | 'DOWN' | 'NOTCHECKED', timeChecked: Date} | false> => {
+export const updateMonitorStatusAndReturnOldIfChanged = async (id: string, result: {status: 'UP' | 'DOWN', timeChecked: Date}): Promise<{status: 'UP' | 'DOWN' | 'NOTCHECKED', timeChecked: Date, addresses: NotificationAddress[]} | false> => {
   // Updates the status and the lastChecked field of the monitor
   const updateResult = await Monitor.findByIdAndUpdate(id, {lastChecked: result.timeChecked, lastStatus: result.status})
 
@@ -26,7 +26,7 @@ export const updateMonitorStatusAndReturnOldIfChanged = async (id: string, resul
 
   // Checks if the status changed from the last check, returns true if it has
   if (updateResult.lastStatus !== result.status){
-    return {status: updateResult.lastStatus, timeChecked: updateResult.lastChecked}
+    return {status: updateResult.lastStatus, timeChecked: updateResult.lastChecked, addresses: updateResult.notificationMethods}
   } else {
     return false
   }
