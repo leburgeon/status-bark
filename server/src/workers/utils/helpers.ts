@@ -1,4 +1,5 @@
 import axios from "axios"
+import Monitor from "../../api/models/Monitor.js"
 
 export const checkUrlStatus = async (url: string): Promise<{status: 'UP' | 'DOWN', timeChecked: Date}> => {
   const timeChecked = new Date()
@@ -14,3 +15,19 @@ export const checkUrlStatus = async (url: string): Promise<{status: 'UP' | 'DOWN
   }
 }
 
+export const updateMonitorStatusAndReturnChanged = async (id: string, result: {status: 'UP' | 'DOWN', timeChecked: Date}): Promise<boolean> => {
+  // Updates the status and the lastChecked field of the monitor
+  const updateResult = await Monitor.findByIdAndUpdate(id, {lastChecked: result.timeChecked, lastStatus: result.status})
+
+  // Throws error if no update was made
+  if (!updateResult){
+    throw new Error('Monitor not found or updated')
+  }
+
+  // Checks if the status changed from the last check, returns true if it has
+  if (updateResult?.lastStatus !== result.status){
+    return true
+  } else {
+    return false
+  }
+}

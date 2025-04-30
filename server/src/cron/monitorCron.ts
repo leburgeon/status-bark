@@ -4,7 +4,6 @@ import { addHealthCheckToQueue } from "../queue/monitorQueue.js";
 
 // Job function
 const onTick = async () => {
-  console.log('searched for due monitors')
   const now = new Date()
   const monitorsDue = await Monitor.find({
     $expr: {
@@ -12,7 +11,6 @@ const onTick = async () => {
     }
   })
   monitorsDue.forEach(async monitor => {
-    console.log('Added a job to the queue')
     await addHealthCheckToQueue(monitor.url, monitor._id.toString())
   })
 }
