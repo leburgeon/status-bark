@@ -1,17 +1,5 @@
 import mongoose, { Schema, model, InferSchemaType, HydratedDocument} from 'mongoose'
 
-const notificationAddressSchema = new Schema({
-  notificationType: {
-    type: String,
-    enum: ['Discord-Web-Hook', 'Email'],
-    required: true
-  },
-  address: {
-    type: String,
-    required: true
-  }
-})
-
 const monitorSchema = new Schema({
   user: {
     type: mongoose.SchemaTypes.ObjectId,
@@ -34,12 +22,12 @@ const monitorSchema = new Schema({
     type: Date,
     default: Date.now
   },
-  notificationMethods : [
-    notificationAddressSchema
-  ]
+  discordWebhook:{
+    encryptedWebhook: String,
+    notify: Boolean
+  }
 }, {timestamps: true})
 
-export type NotificationAddress = InferSchemaType<typeof notificationAddressSchema>
 export type MonitorType = InferSchemaType<typeof monitorSchema>
 export type MonitorDocument = HydratedDocument<MonitorType>
 
