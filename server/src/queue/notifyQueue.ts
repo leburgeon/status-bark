@@ -6,20 +6,24 @@ import { urlStatus } from '../workers/utils/discordNotifyer.js'
 import { Redis } from "ioredis"
 const connection = new Redis(config.UPSTASH_ENDPOINT)
 
-// Initialises the notifications queue
+
+// The const name for the notification queue
 export const notificationQueueName = 'NotificationQueue'
+
+// Initialises the notifications queue
 const notificationQueue = new Queue(notificationQueueName, {connection})
 
-// Helper method for adding the discord notification to the queue
-export interface DiscordStatusChangeNotificationJobData {webHookUrl: string, url: string, oldStatus: urlStatus, newStatus:urlStatus}
+
+
+// Type for the data needed to send a discord status change notification
+export interface DiscordStatusChangeNotificationJobData {encryptedWebookUrl: string, monitorUrl: string, oldStatus: urlStatus, newStatus:urlStatus}
+
+// The job name for discord status change notification
 export const notifyDiscordOfStatusChangeJobName = 'notifyDiscordStatusChange'
-export const addDiscordStatusChangeNotificationJob = async (notificaitonData: DiscordStatusChangeNotificationJobData) => {
+
+// Method for adding a discord status change notification to the notification queue
+export const addDiscordStatusChangeNotificationJob = async (encryptedWebookUrl: string, monitorUrl: string, oldStatus: urlStatus, newStatus: urlStatus) => {
  console.log('discord notification job added to queue from the helper')
- const {webHookUrl, url, oldStatus, newStatus} = notificaitonData
- await notificationQueue.add(notifyDiscordOfStatusChangeJobName, {
-    webHookUrl, 
-    url, 
-    oldStatus, 
-    newStatus
-  })
+ const notificaitonData: DiscordStatusChangeNotificationJobData = {encryptedWebookUrl, monitorUrl, oldStatus, newStatus}
+ await notificationQueue.add(notifyDiscordOfStatusChangeJobName, notificaitonData)
 } 

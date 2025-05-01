@@ -1,5 +1,24 @@
 import mongoose, { Schema, model, InferSchemaType, HydratedDocument} from 'mongoose'
 
+// Defines the type of the discord webhook field so that the required function can access the notify field of the webhook object
+interface DiscordWebhook {
+  notify: boolean,
+  encryptedUrl?: string
+}
+
+const discordWebhookSchema = new Schema<DiscordWebhook>({
+  notify: {
+    type:Boolean,
+    default: false
+  },
+  encryptedUrl: {
+    type: String,
+    required: function () {
+      return this.notify === true
+    }
+  }
+})
+
 const monitorSchema = new Schema({
   user: {
     type: mongoose.SchemaTypes.ObjectId,
@@ -23,8 +42,10 @@ const monitorSchema = new Schema({
     default: Date.now
   },
   discordWebhook:{
-    encryptedWebhook: String,
-    notify: Boolean
+    type: discordWebhookSchema,
+    default: {
+      notify: false
+    }
   }
 }, {timestamps: true})
 
