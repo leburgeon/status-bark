@@ -4,11 +4,13 @@ import { MonitorIntervalUpdate, NewMonitor } from '../types/types.js'
 import Monitor from '../models/Monitor.js'
 import logger from '../../utils/logger.js'
 import { isValidObjectId } from 'mongoose'
+import { encryptDiscordWebhook } from '../../utils/helper.js'
 
 const monitorRouter = express.Router()
 
 // Route for creating a new monitor
 monitorRouter.post('', authenticateAndExtractUser, parseNewMonitor, async (req: Request<unknown, unknown, NewMonitor>, res: Response, next: NextFunction) => {
+  // For fetching the monitors already on this account
   const usersMonitors = await Monitor.find({user: req.user?._id.toString()})
 
   // Ensures that the max monitors for that account has not been reached
@@ -27,9 +29,24 @@ monitorRouter.post('', authenticateAndExtractUser, parseNewMonitor, async (req: 
     res.status(400).json({error: 'A monitor for this url already exists'})
     return
   }
-  // Saves the new monitor
+  
   try {
+    // For attempting to create and save the new monitor
     const newMonitor = new Monitor({url, interval, user: req.user?._id.toString()})
+
+    // Checks if there is a discord webhoook provided and adds it to the new monitor
+    const {discordWebhook} = req.body
+    if (discordWebhook){
+
+      // Encrypts the new webhook and adds to the monitor document
+      const {unEncryptedWebhook, notify} = discordWebhook
+      newMonitor.discordWebhook = {
+        encryptedUrl: encryptDiscordWebhook(unEncryptedWebhook),
+        notify
+      }
+    }
+
+    // Saves the new monitor
     await newMonitor.save()
     res.status(201).json({data: 'Monitor added successfuly'})
   } catch (error) {

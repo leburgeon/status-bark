@@ -24,10 +24,25 @@ export const JwtPayloadSchema = z.object({
   email: z.string().email()
 })
 
-// Zod schema for a new monitor
+// Zod schema for new monitor data recieved from the user
 export const NewMonitorSchema = z.object({
   url: z.string().url(),
-  interval: z.enum(['5', '15', '30'])
+  interval: z.enum(['5', '15', '30']),
+  discordWebhook: z.object({
+    notify: z.boolean(),
+    unEncryptedWebhook: z.string().url().refine(val => {
+      try {
+        const url = new URL(val)
+        return (
+          url.protocol === 'https:' &&
+          url.hostname === 'discord.com' &&
+          /^\/api\/webhooks\/\d+\/[\w-]+$/.test(url.pathname)
+        )
+      } catch {
+        return false
+      }
+    }, {message: 'Invalid Discord Webhook URL'})
+  }).optional()
 })
 
 // Zod schema for parsing a monitor interval update
