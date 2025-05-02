@@ -1,14 +1,21 @@
 import mongoose, { Schema, model, InferSchemaType, HydratedDocument} from 'mongoose'
 
-const notificationAddressSchema = new Schema({
-  notificationType: {
-    type: String,
-    enum: ['Discord-Web-Hook', 'Email'],
-    required: true
+// Defines the type of the discord webhook field so that the required function can access the notify field of the webhook object
+interface DiscordWebhook {
+  notify: boolean,
+  encryptedUrl?: string
+}
+
+const discordWebhookSchema = new Schema<DiscordWebhook>({
+  notify: {
+    type:Boolean,
+    default: false
   },
-  address: {
+  encryptedUrl: {
     type: String,
-    required: true
+    required: function () {
+      return this.notify === true
+    }
   }
 })
 
@@ -34,12 +41,14 @@ const monitorSchema = new Schema({
     type: Date,
     default: Date.now
   },
-  notificationMethods : [
-    notificationAddressSchema
-  ]
+  discordWebhook:{
+    type: discordWebhookSchema,
+    default: {
+      notify: false
+    }
+  }
 }, {timestamps: true})
 
-export type NotificationAddress = InferSchemaType<typeof notificationAddressSchema>
 export type MonitorType = InferSchemaType<typeof monitorSchema>
 export type MonitorDocument = HydratedDocument<MonitorType>
 
