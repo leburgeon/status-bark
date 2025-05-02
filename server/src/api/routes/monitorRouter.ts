@@ -1,10 +1,11 @@
 import express, {Request, Response, NextFunction} from 'express'
 import { authenticateAndExtractUser, parsePartialMontiorPatchData, parseNewMonitor } from '../utils/middlewear.js'
-import { PartialMonitorUpdate, NewMonitor } from '../types/types.js'
+import { PartialMonitorUpdate, NewMonitor, PartialEncryptedMonitorUpdate } from '../types/types.js'
 import Monitor from '../models/Monitor.js'
 import logger from '../../utils/logger.js'
 import mongoose, { isValidObjectId } from 'mongoose'
 import { encryptDiscordWebhook } from '../../utils/helper.js'
+import { encryptAndPopulateMonitorUpdateData } from '../utils/helpers.js'
 
 const monitorRouter = express.Router()
 
@@ -96,16 +97,7 @@ monitorRouter.patch('/:id', authenticateAndExtractUser, parsePartialMontiorPatch
     return
   }
 
-  // Destructures the potential fields from the request body
-  const {url, interval, discordWebhook} = req.body
-
-
-  // For storing the update data
-  const updateData: PartialMonitorUpdate = {}  
-
-
-
-  // For updating the monitor with the new interval
+  // For finding the monitor to update
   const monitorToUpdate = await Monitor.findById(id)
 
   // Asserts that the monitor exists
@@ -114,20 +106,24 @@ monitorRouter.patch('/:id', authenticateAndExtractUser, parsePartialMontiorPatch
     return
   }
 
-  // Checks that the user is authorised to perform update
+  // Asserts that the user is authorised to perform update on the monitor
   if (monitorToUpdate.user.toString() !== req.user?._id.toString()){
     res.status(401).json({error: 'Not authorised to access that data'})
     return
   }
 
-  // Attempts to update the monitor and returns the response
+  // Encrypts any sesnsitive data and populates an update data object
+  const updateData = encryptAndPopulateMonitorUpdateData(req.body)
+
+  // Attempts to make the updates and then return the updated monitor
   try {
-    monitorToUpdate.interval = intervalInteger
-    await monitorToUpdate.save()
-    res.status(200).json({data: {newInterval: intervalInteger}})
+    const result = await Monitor.findByIdAndUpdate(id, updateData, {new: true})
+    res.status(200).json(result)
   } catch (error){
+    logger.error('Error updating a monitor: ', error)
     next(error)
   }
+
 })
 
 // LATER:

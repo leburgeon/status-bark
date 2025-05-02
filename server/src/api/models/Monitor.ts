@@ -17,7 +17,7 @@ const discordWebhookSchema = new Schema<DiscordWebhook>({
       return this.notify === true
     }
   }
-})
+}, {id: false})
 
 const monitorSchema = new Schema({
   user: {

@@ -41,10 +41,10 @@ export const NewMonitorSchema = z.object({
 export const PartialMonitorSchema = NewMonitorSchema.partial()
 
 // Zod object schema for encrypted discord webhook data
-const encryptedDiscordWebhookObject = z.object{
+const encryptedDiscordWebhookObject = z.object({
   notify: z.boolean(),
   encryptedUrl: z.string()
-}
+})
 
 export const PartialEncryptedMonitorUpdateSchema = z.object({
   url: z.string().url(),
