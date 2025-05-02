@@ -30,18 +30,7 @@ export const NewMonitorSchema = z.object({
   interval: z.enum(['5', '15', '30']),
   discordWebhook: z.object({
     notify: z.boolean(),
-    unEncryptedWebhook: z.string().url().refine(val => {
-      try {
-        const url = new URL(val)
-        return (
-          url.protocol === 'https:' &&
-          url.hostname === 'discord.com' &&
-          /^\/api\/webhooks\/\d+\/[\w-]+$/.test(url.pathname)
-        )
-      } catch {
-        return false
-      }
-    }, {message: 'Invalid Discord Webhook URL'})
+    unEncryptedWebhook: z.string().url()
   }).optional()
 })
 

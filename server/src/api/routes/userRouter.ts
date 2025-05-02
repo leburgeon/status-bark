@@ -54,7 +54,7 @@ userRouter.post('/login', parseLoginCredentials, async (req: Request<unknown, un
   }
 
   // Generates a JWT and returns it
-  const token = generateJsonWebToken(email, user._id.toString(), 60 * 60)
+  const token = generateJsonWebToken(email, user._id.toString(), 60 * 60 * 168)
   res.status(200).json({token})
 })
 
