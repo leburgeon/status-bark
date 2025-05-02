@@ -2,6 +2,7 @@ import Monitor from "../src/api/models/Monitor.js"
 import User from "../src/api/models/User.js"
 import bcrypt from "bcryptjs"
 import { generateJsonWebToken } from "../src/api/utils/helpers.js"
+import config from "../src/utils/config.js"
 
 // Initial users to add to the database
 const initialUsers: {email: string, password: string}[] = [
@@ -41,7 +42,11 @@ const initialMonitors: {url: string, interval: number}[] = [
 // Monitor info for adding a new monitor
 const monitorToAdd = {
   url: 'http://github.com',
-  interval: '5'
+  interval: '5',
+  discordWebhook: {
+    notify: true,
+    unEncryptedWebhook: config.TEST_DISCORD_WEBHOOK
+  }
 }
 
 

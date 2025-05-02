@@ -8,5 +8,5 @@ export const encryptDiscordWebhook = (webhook: string) => {
 
 export const decryptDiscordWebhook = (encryptedWebhook: string) => {
   console.log('beep boop decrypting '+ encryptedWebhook)
-  return config.TEMP_DISCORD_WEBHOOK
+  return config.TEST_DISCORD_WEBHOOK
 }
