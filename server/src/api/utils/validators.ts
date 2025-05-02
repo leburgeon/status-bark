@@ -25,7 +25,7 @@ export const JwtPayloadSchema = z.object({
 })
 
 // Zod schema for en unencrypted discord webhook object
-const unEncryptedDiscordWebhookObject = z.object({
+export const unEncryptedDiscordWebhookObjectSchema = z.object({
   notify: z.boolean(),
   unEncryptedWebhook: z.string().url()
 })
@@ -34,7 +34,7 @@ const unEncryptedDiscordWebhookObject = z.object({
 export const NewMonitorSchema = z.object({
   url: z.string().url(),
   interval: z.enum(['5', '15', '30']).transform(val => parseInt(val)),
-  discordWebhook: unEncryptedDiscordWebhookObject.optional()
+  discordWebhook: unEncryptedDiscordWebhookObjectSchema.optional()
 })
 
 // Zod schema for parsing a monitor interval update

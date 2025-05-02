@@ -187,18 +187,39 @@ describe('When there are initially some users in the database', () => {
       })
     })
 
-    describe('updating a monitors interval...', () => {
-      test('succeeds with a valid new interval', async () => {
-        const {interval: preInterval, _id: preId} = await helper.getSpecificFirstUserMonitor()
-        await api.patch('/api/monitors')
-          .send({id: preId.toString(), interval: '30'})
-          .auth(await helper.getBearerTokenOfFirstUser(60*60), {type: 'bearer'})
-          .expect(200)
-        const {interval: postInterval, _id: postId} = await helper.getSpecificFirstUserMonitor()
-        // Asserts that the id of the monitors to compare are the same
-        assert.strictEqual(postId.toString(), preId.toString())
-        // Asserts that the interval has changed
-        assert(postInterval !== preInterval)
+    describe('updating monitor info...', () => {
+      describe('succeeds when...', () => {
+        test('all update data is valid', async () => {
+          const monitorToUpdate = await helper.getSpecificFirstUserMonitor()
+          const {interval: preInterval, _id: preId, discordWebhook: preDiscordWebhook} = monitorToUpdate
+          await api.patch(`/api/monitors/${preId.toString()}`)
+            .send(helper.monitorUpdateData)
+            .auth(await helper.getBearerTokenOfFirstUser(60*60), {type: 'bearer'})
+            .expect(200)
+            
+          const {interval: postInterval, discordWebhook: postDiscordWebhook} = await helper.getMonitorById(preId.toString())
+          // Asserts that the interval has changed
+          assert(postInterval !== preInterval)
+          // Asserts that the discordWebhook object has changed
+          assert.notDeepStrictEqual(postDiscordWebhook, preDiscordWebhook)
+        })
+
+        test('attempting to turn off notifications for a webhook', async () =>{
+          const monitorToUpdate = await helper.getSpecificFirstUserMonitor()
+          const {discordWebhook: {notify: preNotify}} = monitorToUpdate
+          await api.patch(`/api/monitors/${monitorToUpdate._id.toString()}`)
+            .send({discordWebhook: {notify: false}})
+            .auth(await helper.getBearerTokenOfFirstUser(60*60), {type: 'bearer'})
+            .expect(200)
+
+          // Retrieves the monitor after the patch
+          const {discordWebhook: {notify: postNotify}} = await helper.getMonitorById(monitorToUpdate._id.toString())
+
+          // Asserts that the notify values are different
+          assert.notStrictEqual(postNotify, preNotify)
+        })
+
+        test('attempting to remove a discord webhook')
       })
 
       describe('fails when...', () => {
@@ -206,8 +227,8 @@ describe('When there are initially some users in the database', () => {
           const firstUserToken = await helper.getBearerTokenOfFirstUser(60*60)
           const {interval: preInterval, _id: preId} = await helper.getSpecificSecondUserMonitor()
   
-          await api.patch('/api/monitors')
-            .send({id: preId.toString(), interval: '30'})
+          await api.patch(`/api/monitors/${preId.toString()}`)
+            .send({interval: '30'})
             .auth(firstUserToken, {type: 'bearer'})
             .expect(401)
   
@@ -221,8 +242,23 @@ describe('When there are initially some users in the database', () => {
           const firstUserToken = await helper.getBearerTokenOfFirstUser(0)
           const {interval: preInterval, _id: preId} = await helper.getSpecificFirstUserMonitor()
   
-          await api.patch('/api/monitors')
-            .send({id: preId.toString(), interval: '30'})
+          await api.patch(`/api/monitors/${preId.toString()}`)
+            .send(helper.monitorUpdateData)
+            .auth(firstUserToken, {type: 'bearer'})
+            .expect(400)
+  
+          const {interval: postInterval, _id: postId} = await helper.getSpecificFirstUserMonitor()
+  
+          assert.strictEqual(postId.toString(), preId.toString())
+          assert.strictEqual(postInterval, preInterval)
+        })
+
+        test('attempting to update with invalid interval data', async () => {
+          const firstUserToken = await helper.getBearerTokenOfFirstUser(60*60)
+          const {interval: preInterval, _id: preId} = await helper.getSpecificFirstUserMonitor()
+  
+          await api.patch(`/api/monitors/${preId.toString()}`)
+            .send({interval: 'invalid'})
             .auth(firstUserToken, {type: 'bearer'})
             .expect(400)
   

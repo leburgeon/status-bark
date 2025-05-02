@@ -1,6 +1,6 @@
 import express, {Request, Response, NextFunction} from 'express'
 import { authenticateAndExtractUser, parsePartialMontiorPatchData, parseNewMonitor } from '../utils/middlewear.js'
-import { PartialMonitorUpdate, NewMonitor, PartialEncryptedMonitorUpdate } from '../types/types.js'
+import { PartialMonitorUpdate, NewMonitor } from '../types/types.js'
 import Monitor from '../models/Monitor.js'
 import logger from '../../utils/logger.js'
 import mongoose, { isValidObjectId } from 'mongoose'

@@ -3,6 +3,7 @@ import User from "../src/api/models/User.js"
 import bcrypt from "bcryptjs"
 import { generateJsonWebToken } from "../src/api/utils/helpers.js"
 import config from "../src/utils/config.js"
+import { UnEncryptedDiscordWebhookObject } from "../src/api/types/types.js"
 
 // Initial users to add to the database
 const initialUsers: {email: string, password: string}[] = [
@@ -24,18 +25,30 @@ const userToAdd = {
 
 
 // Inital monitor data
-const initialMonitors: {url: string, interval: number}[] = [
+const initialMonitors: {url: string, interval: number, discordWebhook: UnEncryptedDiscordWebhookObject}[] = [
   {
     url: 'http://google.com',
-    interval: 5
+    interval: 5,
+    discordWebhook: {
+      notify: true,
+      unEncryptedWebhook: config.TEST_DISCORD_WEBHOOK
+    }
   },
   {
     url: 'http://facebook.com',
-    interval: 15
+    interval: 5,
+    discordWebhook: {
+      notify: true,
+      unEncryptedWebhook: config.TEST_DISCORD_WEBHOOK
+    }
   },
   {
     url: 'http://alwaysnotthereintime.com',
-    interval: 15
+    interval: 5,
+    discordWebhook: {
+      notify: true,
+      unEncryptedWebhook: config.TEST_DISCORD_WEBHOOK
+    }
   }
 ]
 
@@ -45,6 +58,16 @@ const monitorToAdd = {
   interval: '5',
   discordWebhook: {
     notify: true,
+    unEncryptedWebhook: config.TEST_DISCORD_WEBHOOK
+  }
+}
+
+// Info for sending a monitor update
+const monitorUpdateData = {
+  url: 'http://ebay.com',
+  interval: '15',
+  discordWebhook: {
+    notify: false,
     unEncryptedWebhook: config.TEST_DISCORD_WEBHOOK
   }
 }
@@ -106,6 +129,15 @@ const monitorsInDb = async () => {
   return monitors
 }
 
+// Helper method for getting a specific monitor by its id
+const getMonitorById = async (id: string) => {
+  const monitor = await Monitor.findById(id)
+  if (!monitor) {
+    throw new Error('Error retrieving monitor by id')
+  }
+  return monitor
+}
+
 // For returning a specific monitor of the first user
 const getSpecificFirstUserMonitor = async () => {
   const firstUser = await getFirstUser()
@@ -146,6 +178,7 @@ const getBearerTokenOfFirstUser = async (expiryTimeInSeconds: number) => {
 export default { 
   initialMonitors,
   monitorToAdd,
+  monitorUpdateData,
   clearUserData,
   initialUsers,
   userToAdd,
@@ -155,6 +188,7 @@ export default {
   monitorsInDb,
   addInitialMonitors,
   getBearerTokenOfFirstUser,
+  getMonitorById,
   getSpecificFirstUserMonitor,
   getSpecificSecondUserMonitor
  } 
