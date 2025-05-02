@@ -1,9 +1,9 @@
 import express, {Request, Response, NextFunction} from 'express'
-import { authenticateAndExtractUser, parseMonitorIntervalUpdate, parseNewMonitor } from '../utils/middlewear.js'
-import { MonitorIntervalUpdate, NewMonitor } from '../types/types.js'
+import { authenticateAndExtractUser, parsePartialMontiorPatchData, parseNewMonitor } from '../utils/middlewear.js'
+import { PartialMonitorUpdate, NewMonitor } from '../types/types.js'
 import Monitor from '../models/Monitor.js'
 import logger from '../../utils/logger.js'
-import { isValidObjectId } from 'mongoose'
+import mongoose, { isValidObjectId } from 'mongoose'
 import { encryptDiscordWebhook } from '../../utils/helper.js'
 
 const monitorRouter = express.Router()
@@ -19,8 +19,7 @@ monitorRouter.post('', authenticateAndExtractUser, parseNewMonitor, async (req: 
     return
   }
 
-  const { url, interval: intervalString } = req.body
-  const interval = parseInt(intervalString)
+  const { url, interval} = req.body
 
   // Ensures that the montior does not exist already in the monitors
   if (usersMonitors.some(monitor => {
@@ -89,10 +88,22 @@ monitorRouter.delete('/:id', authenticateAndExtractUser, async (req: Request, re
 })
 
 // Route for modifying the interval
-monitorRouter.patch('', authenticateAndExtractUser, parseMonitorIntervalUpdate, async (req: Request<unknown, unknown, MonitorIntervalUpdate>, res: Response, next: NextFunction) => {
+monitorRouter.patch('/:id', authenticateAndExtractUser, parsePartialMontiorPatchData, async (req: Request<{id: string}, unknown, PartialMonitorUpdate>, res: Response, next: NextFunction) => {
+  // Ensures that the id in the request parameters is a valid object id
+  const {id} = req.params
+  if (!mongoose.isValidObjectId(req.params.id)){
+    res.status(400).json({error: 'Invalid Object ID'})
+    return
+  }
 
-  const {id, interval} = req.body
-  const intervalInteger = parseInt(interval)
+  // Destructures the potential fields from the request body
+  const {url, interval, discordWebhook} = req.body
+
+
+  // For storing the update data
+  const updateData: PartialMonitorUpdate = {}  
+
+
 
   // For updating the monitor with the new interval
   const monitorToUpdate = await Monitor.findById(id)
@@ -102,7 +113,6 @@ monitorRouter.patch('', authenticateAndExtractUser, parseMonitorIntervalUpdate, 
     res.status(404).json({error: 'could not find monitor'})
     return
   }
-
 
   // Checks that the user is authorised to perform update
   if (monitorToUpdate.user.toString() !== req.user?._id.toString()){
