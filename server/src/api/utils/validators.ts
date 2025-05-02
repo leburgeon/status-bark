@@ -28,13 +28,13 @@ export const JwtPayloadSchema = z.object({
 export const unEncryptedDiscordWebhookObjectSchema = z.object({
   notify: z.boolean(),
   unEncryptedWebhook: z.string().url()
-})
+}).partial()
 
 // Zod schema for new monitor data recieved from the user
 export const NewMonitorSchema = z.object({
   url: z.string().url(),
   interval: z.enum(['5', '15', '30']).transform(val => parseInt(val)),
-  discordWebhook: unEncryptedDiscordWebhookObjectSchema.optional()
+  discordWebhook: unEncryptedDiscordWebhookObjectSchema
 })
 
 // Zod schema for parsing a monitor interval update
@@ -44,10 +44,10 @@ export const PartialMonitorSchema = NewMonitorSchema.partial()
 const encryptedDiscordWebhookObject = z.object({
   notify: z.boolean(),
   encryptedUrl: z.string()
-})
+}).partial()
 
 export const PartialEncryptedMonitorUpdateSchema = z.object({
   url: z.string().url(),
   interval: z.enum(['5', '15', '30']).transform(val => parseInt(val)),
-  discordWebhook: encryptedDiscordWebhookObject.optional()
+  discordWebhook: encryptedDiscordWebhookObject
 }).partial()

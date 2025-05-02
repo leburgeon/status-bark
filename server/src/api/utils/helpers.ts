@@ -17,7 +17,7 @@ export const generateJsonWebToken = (email: string, id: string, timeoutInSeconds
 export const encryptAndPopulateMonitorUpdateData = (requestBody: PartialMonitorUpdate): PartialEncryptedMonitorUpdate => {
   
   // Destructures the update data from the request body
-  const {url, interval, discordWebhook} = requestBody
+  const {url, interval, discordWebhook: {notify, unEncryptedWebhook}} = requestBody
 
   // For storing the update data
   const updateData: PartialEncryptedMonitorUpdate = {}
@@ -32,12 +32,9 @@ export const encryptAndPopulateMonitorUpdateData = (requestBody: PartialMonitorU
     updateData.interval = interval
   }
 
-  // For conditionally adding the encrypted discord webhook data
-  if (discordWebhook){
-    updateData.discordWebhook = {
-      notify: discordWebhook.notify,
-      encryptedUrl: encryptDiscordWebhook(discordWebhook.unEncryptedWebhook)
-    }
+  // For conditionally adding an update to the notification field of the discord webhook
+  if (notify !== undefined){
+
   }
 
   return updateData

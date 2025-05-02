@@ -115,6 +115,12 @@ monitorRouter.patch('/:id', authenticateAndExtractUser, parsePartialMontiorPatch
   // Encrypts any sesnsitive data and populates an update data object
   const updateData = encryptAndPopulateMonitorUpdateData(req.body)
 
+  // Ensures that notification is not being turned on if no url is defined
+  if (updateData.discordWebhook?.notify && !updateData.discordWebhook?.encryptedUrl && !monitorToUpdate.discordWebhook?.encryptedUrl){
+    res.status(400).json({error: 'Cant turn on notifications for this monitor if no webhook is present'})
+    return
+  }
+
   // Attempts to make the updates and then return the updated monitor
   try {
     const result = await Monitor.findByIdAndUpdate(id, updateData, {new: true})
