@@ -127,7 +127,7 @@ describe('When there are initially some users in the database', () => {
           const token = await helper.getBearerTokenOfFirstUser(60*60)
     
           await api.post('/api/monitors')
-            .send({url: 'invalid', })
+            .send({...helper.monitorToAdd, url: 'invalid'})
             .auth(token, {type: 'bearer'})
             .expect(400)
           
@@ -165,6 +165,25 @@ describe('When there are initially some users in the database', () => {
           
           assert.strictEqual(monitorsAfter.length, monitorsBefore.length)
         })
+
+        test('an invalid url as the unencrypted discord webhook', async () => {
+          const monitorsBefore = await helper.monitorsInDb()
+
+          const token = await helper.getBearerTokenOfFirstUser(60*60)
+
+          const discordWebhook = {
+            unEncryptedWebhook: 'invalid',
+            notify: true
+          }
+    
+          await api.post('/api/monitors')
+            .send({...helper.monitorToAdd, discordWebhook })
+            .auth(token, {type: 'bearer'})
+            .expect(400)
+          
+          const monitorsAfter = await helper.monitorsInDb()
+          
+          assert.strictEqual(monitorsAfter.length, monitorsBefore.length)        })
       })
     })
 
@@ -215,7 +234,7 @@ describe('When there are initially some users in the database', () => {
       })
     })
 
-    describe.only('attempting to delete a monitor...', () => {
+    describe('attempting to delete a monitor...', () => {
       test('succeeds with valid data', async () => {
         const token = await helper.getBearerTokenOfFirstUser(60*60)
         const monitorToDelete = await helper.getSpecificFirstUserMonitor()
