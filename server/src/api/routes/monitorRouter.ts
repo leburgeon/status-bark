@@ -1,11 +1,11 @@
 import express, {Request, Response, NextFunction} from 'express'
 import { authenticateAndExtractUser, parsePartialMontiorPatchData, parseNewMonitor } from '../utils/middlewear.js'
-import { PartialMonitorUpdate, NewMonitor, EncryptedDiscordWebhookObject } from '../types/types.js'
+import { MonitorPatchData, NewMonitor, EncryptedDiscordWebhookObject, ProcessedMonitorUpdateData } from '../types/types.js'
 import Monitor from '../models/Monitor.js'
 import logger from '../../utils/logger.js'
 import mongoose, { isValidObjectId } from 'mongoose'
 import { encryptDiscordWebhook } from '../../utils/helper.js'
-import { encryptAndPopulateMonitorUpdateData } from '../utils/helpers.js'
+import { processMonitorUpdateData } from '../utils/helpers.js'
 
 const monitorRouter = express.Router()
 
@@ -98,7 +98,7 @@ monitorRouter.delete('/:id', authenticateAndExtractUser, async (req: Request, re
 })
 
 // Route for modifying the interval
-monitorRouter.patch('/:id', authenticateAndExtractUser, parsePartialMontiorPatchData, async (req: Request<{id: string}, unknown, PartialMonitorUpdate>, res: Response, next: NextFunction) => {
+monitorRouter.patch('/:id', authenticateAndExtractUser, parsePartialMontiorPatchData, async (req: Request<{id: string}, unknown, MonitorPatchData>, res: Response, next: NextFunction) => {
   // Ensures that the id in the request parameters is a valid object id
   const {id} = req.params
   if (!mongoose.isValidObjectId(req.params.id)){
@@ -120,15 +120,16 @@ monitorRouter.patch('/:id', authenticateAndExtractUser, parsePartialMontiorPatch
     res.status(401).json({error: 'Not authorised to access that data'})
     return
   }
-
-  // Encrypts any sesnsitive data and populates an update data object
-  const updateData = encryptAndPopulateMonitorUpdateData(req.body)
-
-  // Ensures that notification is not being turned on if no url is defined
-  if (updateData.discordWebhook?.notify && !updateData.discordWebhook?.encryptedUrl && !monitorToUpdate.discordWebhook?.encryptedUrl){
+  
+  // Ensures that if notify is being updated to true on the discord webhook object, the url is either defined in the update or on the monitor already
+  const { discordWebhook: discordWebhookUpdate } = req.body
+  if (discordWebhookUpdate?.notify === true && !discordWebhookUpdate?.unEncryptedWebhook && !monitorToUpdate.discordWebhook?.encryptedUrl){
     res.status(400).json({error: 'Cant turn on notifications for this monitor if no webhook is present'})
     return
-  }
+  } 
+
+  // Processes and populates update data
+  const updateData = processMonitorUpdateData(req.body)
 
   // Attempts to make the updates and then return the updated monitor
   try {

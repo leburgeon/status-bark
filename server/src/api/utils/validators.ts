@@ -24,9 +24,15 @@ export const JwtPayloadSchema = z.object({
   email: z.string().email()
 })
 
-// Zod schema for en unencrypted discord webhook object
+
+
+
+
+// ADDING A NEW MONITOR
+
+// Zod schema for an unencrypted discord webhook object
 // If notify is true, webhook must be provided or an error is thrown
-export const unEncryptedDiscordWebhookObjectSchema = z.object({
+export const UnEncryptedDiscordWebhookObjectSchema = z.object({
   notify: z.boolean(),
   unEncryptedWebhook: z.string().url().optional()
 }).refine(val => {
@@ -40,20 +46,40 @@ export const unEncryptedDiscordWebhookObjectSchema = z.object({
 export const NewMonitorSchema = z.object({
   url: z.string().url(),
   interval: z.enum(['5', '15', '30']).transform(val => parseInt(val)),
-  discordWebhook: unEncryptedDiscordWebhookObjectSchema.optional()
+  discordWebhook: UnEncryptedDiscordWebhookObjectSchema.optional()
 })
 
-// Zod schema for parsing a monitor interval update
-export const PartialMonitorSchema = NewMonitorSchema.partial()
-
 // Zod object schema for encrypted discord webhook data
-export const encryptedDiscordWebhookObjectSchema = z.object({
+export const EncryptedDiscordWebhookObjectSchema = z.object({
   notify: z.boolean(),
   encryptedUrl: z.string().optional()
 })
 
-export const PartialEncryptedMonitorUpdateSchema = z.object({
+
+
+
+
+
+
+
+// PATCHING AN EXISTING MONITOR
+
+// Zod schema for parsing discord webhook patch data
+const DiscordWebhookPatchDataSchema = z.object({
+  notify: z.boolean(),
+  unEncryptedWebhook: z.string().url()
+}).partial()
+
+// Zod schema for parsing monitor patch data
+export const MonitorPatchDataSchema = z.object({
   url: z.string().url(),
   interval: z.enum(['5', '15', '30']).transform(val => parseInt(val)),
-  discordWebhook: encryptedDiscordWebhookObjectSchema.optional()
+  discordWebhook: DiscordWebhookPatchDataSchema
+}).partial()
+
+
+export const ProcessedMonitorUpdateSchema = z.object({
+  url: z.string().url(),
+  interval: z.enum(['5', '15', '30']).transform(val => parseInt(val)),
+  discordWebhook: EncryptedDiscordWebhookObjectSchema.partial()
 }).partial()
