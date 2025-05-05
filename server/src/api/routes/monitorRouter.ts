@@ -1,6 +1,6 @@
 import express, {Request, Response, NextFunction} from 'express'
 import { authenticateAndExtractUser, parsePartialMontiorPatchData, parseNewMonitor } from '../utils/middlewear.js'
-import { PartialMonitorUpdate, NewMonitor } from '../types/types.js'
+import { PartialMonitorUpdate, NewMonitor, EncryptedDiscordWebhookObject } from '../types/types.js'
 import Monitor from '../models/Monitor.js'
 import logger from '../../utils/logger.js'
 import mongoose, { isValidObjectId } from 'mongoose'
@@ -34,16 +34,25 @@ monitorRouter.post('', authenticateAndExtractUser, parseNewMonitor, async (req: 
     // For attempting to create and save the new monitor
     const newMonitor = new Monitor({url, interval, user: req.user?._id.toString()})
 
-    // Checks if there is a discord webhoook provided and adds it to the new monitor
+    // Checks if there is a discord webhoook provided
     const {discordWebhook} = req.body
     if (discordWebhook){
-
-      // Encrypts the new webhook and adds to the monitor document
+      // Destructures the values from the object
       const {unEncryptedWebhook, notify} = discordWebhook
-      newMonitor.discordWebhook = {
-        encryptedUrl: encryptDiscordWebhook(unEncryptedWebhook),
-        notify
+
+      // For storing the discord webhook data to add to the new monitor document
+      // Notify is always false if a webhook is not provided
+      const discordWebhookData: EncryptedDiscordWebhookObject = {notify: false}
+
+      // Checks if the unEncryptedWebhook is defined
+      if (unEncryptedWebhook){
+        // If one is provided, encrypts the webhook and adds it to the new document with notify
+        discordWebhookData.encryptedUrl = encryptDiscordWebhook(unEncryptedWebhook)
+        discordWebhookData.notify = notify
       }
+
+      // Adds the discord webhook data to the document
+      newMonitor.discordWebhook = discordWebhookData
     }
 
     // Saves the new monitor

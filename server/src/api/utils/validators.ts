@@ -25,29 +25,35 @@ export const JwtPayloadSchema = z.object({
 })
 
 // Zod schema for en unencrypted discord webhook object
+// If notify is true, webhook must be provided or an error is thrown
 export const unEncryptedDiscordWebhookObjectSchema = z.object({
   notify: z.boolean(),
-  unEncryptedWebhook: z.string().url()
-}).partial()
+  unEncryptedWebhook: z.string().url().optional()
+}).refine(val => {
+  if (val.notify){
+    return val.unEncryptedWebhook !== undefined
+  }
+  return true
+},{message: 'If notify: true, url must be defined'})
 
-// Zod schema for new monitor data recieved from the user
+// Zod schema for new monitor data recieved from the user, with optional discordWebhook object
 export const NewMonitorSchema = z.object({
   url: z.string().url(),
   interval: z.enum(['5', '15', '30']).transform(val => parseInt(val)),
-  discordWebhook: unEncryptedDiscordWebhookObjectSchema
+  discordWebhook: unEncryptedDiscordWebhookObjectSchema.optional()
 })
 
 // Zod schema for parsing a monitor interval update
 export const PartialMonitorSchema = NewMonitorSchema.partial()
 
 // Zod object schema for encrypted discord webhook data
-const encryptedDiscordWebhookObject = z.object({
+export const encryptedDiscordWebhookObjectSchema = z.object({
   notify: z.boolean(),
-  encryptedUrl: z.string()
-}).partial()
+  encryptedUrl: z.string().optional()
+})
 
 export const PartialEncryptedMonitorUpdateSchema = z.object({
   url: z.string().url(),
   interval: z.enum(['5', '15', '30']).transform(val => parseInt(val)),
-  discordWebhook: encryptedDiscordWebhookObject
+  discordWebhook: encryptedDiscordWebhookObjectSchema.optional()
 }).partial()

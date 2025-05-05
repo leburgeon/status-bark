@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { LoginCredentialsSchema, NewMonitorSchema, NewUserSchema, PartialEncryptedMonitorUpdateSchema, PartialMonitorSchema, unEncryptedDiscordWebhookObjectSchema } from '../utils/validators.js'
+import { encryptedDiscordWebhookObjectSchema, LoginCredentialsSchema, NewMonitorSchema, NewUserSchema, PartialEncryptedMonitorUpdateSchema, PartialMonitorSchema, unEncryptedDiscordWebhookObjectSchema } from '../utils/validators.js'
 
 // Type for registering user information
 export type NewUser = z.infer<typeof NewUserSchema>
@@ -15,6 +15,9 @@ export type PartialMonitorUpdate = z.infer<typeof PartialMonitorSchema>
 
 // Type for an unencrypted discord webhook object
 export type UnEncryptedDiscordWebhookObject = z.infer<typeof unEncryptedDiscordWebhookObjectSchema>
+
+// Type for an encrypted discord webhook object
+export type EncryptedDiscordWebhookObject = z.infer<typeof encryptedDiscordWebhookObjectSchema>
 
 // Type for partial monitor update data after encryptions
 export type PartialEncryptedMonitorUpdate = z.infer<typeof PartialEncryptedMonitorUpdateSchema>

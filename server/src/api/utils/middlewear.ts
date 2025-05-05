@@ -29,6 +29,7 @@ export const parseLoginCredentials = (req: Request, _res: Response, next: NextFu
 }
 
 // For parsing new monitor information from a request body
+// If discordWebhook object is defined, validates that notify:true ensures a webhook is provided
 export const parseNewMonitor = (req: Request, _res: Response, next: NextFunction) => {
   parseRequestBodyWith(NewMonitorSchema, req, next)
 }
