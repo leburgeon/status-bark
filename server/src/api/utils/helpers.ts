@@ -16,21 +16,33 @@ export const generateJsonWebToken = (email: string, id: string, timeoutInSeconds
 
 // Processes monitor update data
 export const processMonitorUpdateData = (data: MonitorPatchData): ProcessedMonitorUpdateData => {
-  // Spreads the update data into the processed data object
-  let processedData: ProcessedMonitorUpdateData = {...data}
+  // For destructuring the update data
+  const { url, interval, discordWebhook } = data
 
-  // If discord webhook updates are present, checks if a new url has been provided and encrypts it before adding to the data
-  const { discordWebhook } = data
-  if (discordWebhook && discordWebhook.unEncryptedWebhook){
-    processedData = {
-      ...processedData, 
-      discordWebhook: {
-        ...processedData.discordWebhook, 
-        encryptedUrl: encryptDiscordWebhook(discordWebhook.unEncryptedWebhook)
-      }
+  // Initializes the object to return
+  const processedData: ProcessedMonitorUpdateData = {}
+
+  // If the url is being updated, add the url to the update data
+  if (url) {
+    processedData.url = url
+  }
+
+  // If the interval is defined, add the interval to the update data
+  if (interval) {
+    processedData.interval = interval
+  }
+
+  // If discordWebhook is defined and unEncryptedWebhook is present, encrypt and add to the update data
+  if (discordWebhook?.unEncryptedWebhook) {
+    processedData.discordWebhook = {
+      encryptedUrl: encryptDiscordWebhook(discordWebhook.unEncryptedWebhook),
     }
   }
 
-  // Returns the processes data
-  return processedData
-}
+  // If discordWebhook is defined and notify is present, handle it (if needed)
+  if (discordWebhook?.notify !== undefined) {
+    processedData.discordWebhook = {...processedData.discordWebhook, notify: discordWebhook.notify}
+  }
+
+  return processedData;
+};

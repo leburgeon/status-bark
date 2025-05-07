@@ -1,6 +1,6 @@
 import express, {Request, Response, NextFunction} from 'express'
 import { authenticateAndExtractUser, parsePartialMontiorPatchData, parseNewMonitor } from '../utils/middlewear.js'
-import { MonitorPatchData, NewMonitor, EncryptedDiscordWebhookObject, ProcessedMonitorUpdateData } from '../types/types.js'
+import { MonitorPatchData, NewMonitor, EncryptedDiscordWebhookObject } from '../types/types.js'
 import Monitor from '../models/Monitor.js'
 import logger from '../../utils/logger.js'
 import mongoose, { isValidObjectId } from 'mongoose'

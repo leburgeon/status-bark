@@ -3,7 +3,7 @@ import User from "../src/api/models/User.js"
 import bcrypt from "bcryptjs"
 import { generateJsonWebToken } from "../src/api/utils/helpers.js"
 import config from "../src/utils/config.js"
-import { UnEncryptedDiscordWebhookObject } from "../src/api/types/types.js"
+import { NewMonitor } from "../src/api/types/types.js"
 
 // Initial users to add to the database
 const initialUsers: {email: string, password: string}[] = [
@@ -25,13 +25,13 @@ const userToAdd = {
 
 
 // Inital monitor data
-const initialMonitors: {url: string, interval: number, discordWebhook: UnEncryptedDiscordWebhookObject}[] = [
+const initialMonitors = [
   {
     url: 'http://google.com',
     interval: 5,
     discordWebhook: {
       notify: true,
-      unEncryptedWebhook: config.TEST_DISCORD_WEBHOOK
+      encryptedUrl: config.TEST_DISCORD_WEBHOOK
     }
   },
   {
@@ -39,7 +39,7 @@ const initialMonitors: {url: string, interval: number, discordWebhook: UnEncrypt
     interval: 5,
     discordWebhook: {
       notify: true,
-      unEncryptedWebhook: config.TEST_DISCORD_WEBHOOK
+      encryptedUrl: config.TEST_DISCORD_WEBHOOK
     }
   },
   {
@@ -47,7 +47,7 @@ const initialMonitors: {url: string, interval: number, discordWebhook: UnEncrypt
     interval: 5,
     discordWebhook: {
       notify: true,
-      unEncryptedWebhook: config.TEST_DISCORD_WEBHOOK
+      encryptedUrl: config.TEST_DISCORD_WEBHOOK
     }
   }
 ]
@@ -164,6 +164,14 @@ const getSpecificSecondUserMonitor = async () => {
   return monitor
 }
 
+// For adding a monitor with the data provided, and then returning the id as a string
+const addMonitorWithDataAsFirstUserAndReturnId = async (data: NewMonitor) => {
+  const firstUser = await User.findOne({email: initialUsers[0].email})
+  const newMonitor = new Monitor({...data, user: firstUser?._id.toString()})
+  await newMonitor.save()
+  return newMonitor._id.toString()
+}
+
 // For getting the login token for the test runner
 const getBearerTokenOfFirstUser = async (expiryTimeInSeconds: number) => {
   const { email } = initialUsers[0]
@@ -190,5 +198,6 @@ export default {
   getBearerTokenOfFirstUser,
   getMonitorById,
   getSpecificFirstUserMonitor,
+  addMonitorWithDataAsFirstUserAndReturnId,
   getSpecificSecondUserMonitor
  } 

@@ -109,7 +109,7 @@ describe('When there are initially some users in the database', () => {
     describe('adding a new monitor...', () => {
       test('works with valid data and login token', async () => {
         const monitorsBefore = await helper.monitorsInDb()
-  
+
         await api.post('/api/monitors')
           .send(helper.monitorToAdd)
           .auth(await helper.getBearerTokenOfFirstUser(60*60), {type: 'bearer'})
@@ -183,12 +183,35 @@ describe('When there are initially some users in the database', () => {
           
           const monitorsAfter = await helper.monitorsInDb()
           
-          assert.strictEqual(monitorsAfter.length, monitorsBefore.length)        })
+          assert.strictEqual(monitorsAfter.length, monitorsBefore.length)
+        })
+
+        test('an undefined webhook url if notify is true', async () => {
+          const monitorsBefore = await helper.monitorsInDb()
+
+          const token = await helper.getBearerTokenOfFirstUser(60*60)
+
+          // The breaking webhook data
+          const discordWebhook = {
+            notify: true
+          }
+    
+          await api.post('/api/monitors')
+            .send({...helper.monitorToAdd, discordWebhook })
+            .auth(token, {type: 'bearer'})
+            .expect(400)
+          
+          const monitorsAfter = await helper.monitorsInDb()
+          
+          assert.strictEqual(monitorsAfter.length, monitorsBefore.length)
+        })
       })
     })
 
     describe('updating monitor info...', () => {
+
       describe('succeeds when...', () => {
+
         test('all update data is valid', async () => {
           const monitorToUpdate = await helper.getSpecificFirstUserMonitor()
           const {interval: preInterval, _id: preId, discordWebhook: preDiscordWebhook} = monitorToUpdate
@@ -266,6 +289,23 @@ describe('When there are initially some users in the database', () => {
   
           assert.strictEqual(postId.toString(), preId.toString())
           assert.strictEqual(postInterval, preInterval)
+        })
+
+        test.only('attempting to turn on a the notification for a monitor with an undefined url', async () => {
+          const firstUserToken = await helper.getBearerTokenOfFirstUser(60*60)
+          const {url, interval} = helper.monitorToAdd
+          const monitorId = await helper.addMonitorWithDataAsFirstUserAndReturnId({url, interval: parseInt(interval)})
+
+          const {discordWebhook: {notify: preNotify}} = await helper.getMonitorById(monitorId)
+  
+          await api.patch(`/api/monitors/${monitorId}`)
+            .send({discordWebhook:{notify: true}})
+            .auth(firstUserToken, {type: 'bearer'})
+            .expect(400)
+  
+          const {discordWebhook: {notify: postNotify}} = await helper.getMonitorById(monitorId)
+  
+          assert.strictEqual(postNotify, preNotify)
         })
       })
     })
