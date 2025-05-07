@@ -142,6 +142,33 @@ monitorRouter.patch('/:id', authenticateAndExtractUser, parsePartialMontiorPatch
 
 })
 
+monitorRouter.patch('/discordWebhook/:id', authenticateAndExtractUser, parseDiscordWebhookPatchData, async (req: Request<{id:string}, unknown, unknown>, res: Response, next: NextFunction) => {
+  const {id} = req.params
+
+  const { notify, unEncryptedWebhook } = req.body
+  
+  // For storing the set part of the update
+  const $set: Record<string, string | boolean> = {}
+
+
+  
+
+
+
+
+
+
+  try {
+    // Attempts to update the monitor with findById
+
+
+    // sends success response if successful
+  } catch (error){
+    // Throws to error handler if not
+    next(error)
+  }
+})
+
 // LATER:
 // Retrieving all the pings from that monitor
 

@@ -242,7 +242,9 @@ describe('When there are initially some users in the database', () => {
           assert.notStrictEqual(postNotify, preNotify)
         })
 
-        test('attempting to remove a discord webhook')
+        test('attempting to remove a discord webhook', async () => {
+          
+        })
       })
 
       describe('fails when...', () => {
@@ -291,7 +293,7 @@ describe('When there are initially some users in the database', () => {
           assert.strictEqual(postInterval, preInterval)
         })
 
-        test.only('attempting to turn on a the notification for a monitor with an undefined url', async () => {
+        test('attempting to turn on a the notification for a monitor with an undefined url', async () => {
           const firstUserToken = await helper.getBearerTokenOfFirstUser(60*60)
           const {url, interval} = helper.monitorToAdd
           const monitorId = await helper.addMonitorWithDataAsFirstUserAndReturnId({url, interval: parseInt(interval)})

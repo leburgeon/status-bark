@@ -44,5 +44,5 @@ export const processMonitorUpdateData = (data: MonitorPatchData): ProcessedMonit
     processedData.discordWebhook = {...processedData.discordWebhook, notify: discordWebhook.notify}
   }
 
-  return processedData;
-};
+  return processedData
+}
