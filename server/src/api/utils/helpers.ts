@@ -1,8 +1,6 @@
 import { passwordStrength } from "check-password-strength";
 import jwt from 'jsonwebtoken'
 import config from "../../utils/config.js";
-import { MonitorPatchData, ProcessedMonitorUpdateData } from "../types/types.js";
-import { encryptDiscordWebhook } from "../../utils/helper.js";
 
 // Method for checking the strength of a password
 export const passwordIsStrong = (password: string): boolean => {
@@ -14,35 +12,35 @@ export const generateJsonWebToken = (email: string, id: string, timeoutInSeconds
   return jwt.sign({email, id}, config.JWT_SECRET, {expiresIn: timeoutInSeconds})
 }
 
-// Processes monitor update data
-export const processMonitorUpdateData = (data: MonitorPatchData): ProcessedMonitorUpdateData => {
-  // For destructuring the update data
-  const { url, interval, discordWebhook } = data
+// Helper function for building a mongoDb update object from a request body
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const buildUpdate = <T extends object>(input: Partial<T>, allowedFields: (keyof T)[], prefix: string):Record<string, any> => {
+  // For storing the values of the update operations for updating and  removing
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const $set: Record<string, any> = {}
+  const $unset: Record<string, 1> = {}
 
-  // Initializes the object to return
-  const processedData: ProcessedMonitorUpdateData = {}
-
-  // If the url is being updated, add the url to the update data
-  if (url) {
-    processedData.url = url
-  }
-
-  // If the interval is defined, add the interval to the update data
-  if (interval) {
-    processedData.interval = interval
-  }
-
-  // If discordWebhook is defined and unEncryptedWebhook is present, encrypt and add to the update data
-  if (discordWebhook?.unEncryptedWebhook) {
-    processedData.discordWebhook = {
-      encryptedUrl: encryptDiscordWebhook(discordWebhook.unEncryptedWebhook),
+  // Itterates over the keys in the input object
+  for (const key of Object.keys(input) as (keyof T)[]){
+    // Only handles keys that are in the allowedFields array
+    if (!allowedFields.includes(key)) continue
+    
+    // If the value is null or undefined, adds it to the $unset object
+    // Else adds to the set update object
+    const value = input[key]
+    if (value === undefined || value === null){
+      $unset[prefix + String(key)] = 1
+    } else {
+      $set[prefix + String(key)] = value
     }
   }
 
-  // If discordWebhook is defined and notify is present, handle it (if needed)
-  if (discordWebhook?.notify !== undefined) {
-    processedData.discordWebhook = {...processedData.discordWebhook, notify: discordWebhook.notify}
-  }
+  // For storing the update operation objects
+  const update: Record<string, Partial<T> | Record<string, 1>> = {}
 
-  return processedData
+  // For adding the update operations to the update object
+  if (Object.keys($set).length > 0) update.$set = $set
+  if (Object.keys($unset).length > 0) update.$unset = $unset
+
+  return update
 }

@@ -1,11 +1,11 @@
 import express, {Request, Response, NextFunction} from 'express'
-import { authenticateAndExtractUser, parsePartialMontiorPatchData, parseNewMonitor } from '../utils/middlewear.js'
-import { MonitorPatchData, NewMonitor, EncryptedDiscordWebhookObject } from '../types/types.js'
+import { authenticateAndExtractUser, parsePartialMontiorPatchData, parseNewMonitor, parseAndProcessDiscordWebhookPatchData } from '../utils/middlewear.js'
+import { MonitorPatchData, NewMonitor, EncryptedDiscordWebhookObject, ProcessedDiscordWebhookPatchData } from '../types/types.js'
 import Monitor from '../models/Monitor.js'
 import logger from '../../utils/logger.js'
 import mongoose, { isValidObjectId } from 'mongoose'
 import { encryptDiscordWebhook } from '../../utils/helper.js'
-import { processMonitorUpdateData } from '../utils/helpers.js'
+import { buildUpdate } from '../utils/helpers.js'
 
 const monitorRouter = express.Router()
 
@@ -97,10 +97,13 @@ monitorRouter.delete('/:id', authenticateAndExtractUser, async (req: Request, re
 
 })
 
-// Route for modifying the interval
+// Route for modifying the interval or the url string
 monitorRouter.patch('/:id', authenticateAndExtractUser, parsePartialMontiorPatchData, async (req: Request<{id: string}, unknown, MonitorPatchData>, res: Response, next: NextFunction) => {
-  // Ensures that the id in the request parameters is a valid object id
+  
   const {id} = req.params
+
+  // Ensures that the id in the request parameters is a valid object id
+
   if (!mongoose.isValidObjectId(req.params.id)){
     res.status(400).json({error: 'Invalid Object ID'})
     return
@@ -121,19 +124,14 @@ monitorRouter.patch('/:id', authenticateAndExtractUser, parsePartialMontiorPatch
     return
   }
   
-  // Ensures that if notify is being updated to true on the discord webhook object, the url is either defined in the update or on the monitor already
-  const { discordWebhook: discordWebhookUpdate } = req.body
-  if (discordWebhookUpdate?.notify === true && !discordWebhookUpdate?.unEncryptedWebhook && !monitorToUpdate.discordWebhook?.encryptedUrl){
-    res.status(400).json({error: 'Cant turn on notifications for this monitor if no webhook is present'})
-    return
-  } 
-
-  // Processes and populates update data
-  const updateData = processMonitorUpdateData(req.body)
+  const updateData = buildUpdate<MonitorPatchData>(req.body, ['url', 'interval'], '')
 
   // Attempts to make the updates and then return the updated monitor
   try {
-    const result = await Monitor.findByIdAndUpdate(id, updateData, {new: true})
+    const result = await Monitor.findByIdAndUpdate(id, updateData, {new: true, runValidators: true})
+    if (!result) {
+      res.status(404).json({error: 'monitor not found'})
+    }
     res.status(200).json(result)
   } catch (error){
     logger.error('Error updating a monitor: ', error)
@@ -142,29 +140,41 @@ monitorRouter.patch('/:id', authenticateAndExtractUser, parsePartialMontiorPatch
 
 })
 
-monitorRouter.patch('/discordWebhook/:id', authenticateAndExtractUser, parseDiscordWebhookPatchData, async (req: Request<{id:string}, unknown, unknown>, res: Response, next: NextFunction) => {
+monitorRouter.patch('/discordWebhook/:id', authenticateAndExtractUser, parseAndProcessDiscordWebhookPatchData, async (req: Request<{id:string}, unknown, ProcessedDiscordWebhookPatchData>, res: Response, next: NextFunction) => {
+  // Ensures that the id in the request parameters is a valid object id
   const {id} = req.params
+  if (!mongoose.isValidObjectId(req.params.id)){
+    res.status(400).json({error: 'Invalid Object ID'})
+    return
+  }
 
-  const { notify, unEncryptedWebhook } = req.body
-  
-  // For storing the set part of the update
-  const $set: Record<string, string | boolean> = {}
+  // Ensures that the monitor exists
+  const monitorToUpdate = await Monitor.findById(id)
+  if (!monitorToUpdate){
+    res.status(404).json({error: 'Cant find that monitor'})
+    return
+  }
 
+  const { encryptedUrl, notify } = req.body
 
-  
+  // Ensures that if notify is being updated to true on the discord webhook object, the url is either defined in the update or on the monitor already
+  if (notify === true && !encryptedUrl && !monitorToUpdate.discordWebhook?.encryptedUrl){
+    res.status(400).json({error: 'Cant turn on notifications for this monitor if no webhook is present'})
+    return
+  } 
 
-
-
-
-
+  const update = buildUpdate<ProcessedDiscordWebhookPatchData>(req.body, ['notify', 'encryptedUrl'], 'discordWebhook.')
 
   try {
-    // Attempts to update the monitor with findById
+    const result = await Monitor.findByIdAndUpdate(id, update, {new: true, runValidators: true})
 
+    if (!result){
+      res.status(404).json({error: 'Monitor not found'})
+      return
+    }
 
-    // sends success response if successful
-  } catch (error){
-    // Throws to error handler if not
+    res.status(200).json('okayeye')
+  } catch (error) {
     next(error)
   }
 })

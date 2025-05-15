@@ -230,8 +230,8 @@ describe('When there are initially some users in the database', () => {
         test('attempting to turn off notifications for a webhook', async () =>{
           const monitorToUpdate = await helper.getSpecificFirstUserMonitor()
           const {discordWebhook: {notify: preNotify}} = monitorToUpdate
-          await api.patch(`/api/monitors/${monitorToUpdate._id.toString()}`)
-            .send({discordWebhook: {notify: false}})
+          await api.patch(`/api/monitors/discordWebhook/${monitorToUpdate._id.toString()}`)
+            .send({notify: false})
             .auth(await helper.getBearerTokenOfFirstUser(60*60), {type: 'bearer'})
             .expect(200)
 
@@ -242,9 +242,9 @@ describe('When there are initially some users in the database', () => {
           assert.notStrictEqual(postNotify, preNotify)
         })
 
-        test('attempting to remove a discord webhook', async () => {
-          
-        })
+        // test('attempting to remove a discord webhook', async () => {
+        //   const monitorToUpdate = await helper.
+        // })
       })
 
       describe('fails when...', () => {
@@ -294,14 +294,15 @@ describe('When there are initially some users in the database', () => {
         })
 
         test('attempting to turn on a the notification for a monitor with an undefined url', async () => {
+          // First adds the monitor without a discord webhook
           const firstUserToken = await helper.getBearerTokenOfFirstUser(60*60)
           const {url, interval} = helper.monitorToAdd
           const monitorId = await helper.addMonitorWithDataAsFirstUserAndReturnId({url, interval: parseInt(interval)})
 
           const {discordWebhook: {notify: preNotify}} = await helper.getMonitorById(monitorId)
   
-          await api.patch(`/api/monitors/${monitorId}`)
-            .send({discordWebhook:{notify: true}})
+          await api.patch(`/api/monitors/discordWebhook/${monitorId}`)
+            .send({notify: true})
             .auth(firstUserToken, {type: 'bearer'})
             .expect(400)
   

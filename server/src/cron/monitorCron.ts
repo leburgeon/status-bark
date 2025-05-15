@@ -11,6 +11,7 @@ const onTick = async () => {
     }
   })
   monitorsDue.forEach(async monitor => {
+    console.log(`Due monitor found ${monitor.url}`)
     await addHealthCheckToQueue(monitor.url, monitor._id.toString())
   })
 }

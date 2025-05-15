@@ -65,11 +65,7 @@ const monitorToAdd = {
 // Info for sending a monitor update
 const monitorUpdateData = {
   url: 'http://ebay.com',
-  interval: '15',
-  discordWebhook: {
-    notify: false,
-    unEncryptedWebhook: config.TEST_DISCORD_WEBHOOK
-  }
+  interval: '15'
 }
 
 

@@ -1,11 +1,12 @@
 import { NextFunction, Request, Response } from 'express'
-import { JwtPayloadSchema, LoginCredentialsSchema, NewMonitorSchema, NewUserSchema, MonitorPatchDataSchema } from './validators.js'
+import { JwtPayloadSchema, LoginCredentialsSchema, NewMonitorSchema, NewUserSchema, MonitorPatchDataSchema, DiscordWebhookPatchDataSchema } from './validators.js'
 import { ZodError, ZodSchema } from 'zod'
 import logger from '../../utils/logger.js'
 import { MongooseError } from 'mongoose'
 import jwt from 'jsonwebtoken'
 import config from '../../utils/config.js'
 import User from '../models/User.js'
+import { encryptDiscordWebhook } from '../../utils/helper.js'
 
 // Skeleton method for parsing a request body with a zod schema
 const parseRequestBodyWith = (schema: ZodSchema, req: Request, next: NextFunction) => {
@@ -34,9 +35,28 @@ export const parseNewMonitor = (req: Request, _res: Response, next: NextFunction
   parseRequestBodyWith(NewMonitorSchema, req, next)
 }
 
-// For parsing an interval update for a monitor
+// For parsing an update for a monitor
 export const parsePartialMontiorPatchData = (req: Request, _res: Response, next: NextFunction) => {
   parseRequestBodyWith(MonitorPatchDataSchema, req, next)
+}
+
+// For parsing and processing the discord webhook update. Adding either the encrypted webook, or a null value to the encryptedUrl field.
+export const parseAndProcessDiscordWebhookPatchData = (req: Request, _res: Response, next: NextFunction) => {
+  // Parses the request body to ensure update values of the correct type
+  try {
+    DiscordWebhookPatchDataSchema.parse(req.body)
+    // Processes the discord webhook url update if present
+    if (Object.keys(req.body).includes('unEncryptedWebhook')){
+      if (req.body.unEncryptedWebhook){
+        req.body.encryptedUrl = encryptDiscordWebhook(req.body.unEncryptedWebhook)
+      } else {
+        req.body.encryptedUrl = null
+      }
+    }
+    next()
+  } catch (error) {
+    next(error)
+  }
 }
 
 // For authenticating a user

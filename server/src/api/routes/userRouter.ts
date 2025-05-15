@@ -4,7 +4,6 @@ import User from '../models/User.js'
 import { authenticateAndExtractUser, parseLoginCredentials, parseNewUser } from '../utils/middlewear.js'
 import { passwordIsStrong } from '../utils/helpers.js'
 import bcrypt from 'bcryptjs'
-import logger from '../../utils/logger.js'
 import { generateJsonWebToken } from '../utils/helpers.js'
 
 const userRouter = express.Router()
@@ -60,8 +59,6 @@ userRouter.post('/login', parseLoginCredentials, async (req: Request<unknown, un
 
 // Route for deleting a user
 userRouter.delete('', authenticateAndExtractUser, async (req: Request, res: Response, next: NextFunction) => {
-  console.log('hototo')
-  logger.debug('got here')
   try {
     await User.findByIdAndDelete(req.user?._id)
     res.status(204).end()

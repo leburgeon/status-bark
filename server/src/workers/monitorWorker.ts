@@ -3,7 +3,6 @@ import {Redis} from "ioredis"
 import config from "../utils/config.js"
 import { monitorQueueName } from "../queue/monitorQueue.js"
 import { checkUrlStatus, updateMonitorStatusAndReturnOldMonitor} from "./utils/helpers.js"
-import logger from "../utils/logger.js"
 import mongoose from "mongoose"
 import { addDiscordStatusChangeNotificationJob } from "../queue/notifyQueue.js"
 import { urlStatus } from "./utils/discordNotifyer.js"
@@ -16,27 +15,24 @@ const connection = new Redis(config.UPSTASH_ENDPOINT, {maxRetriesPerRequest: nul
 
 // Worker for completing scheduled health checks on due monitors
 const monitorWorker = new Worker(monitorQueueName, async (job) => {
-  try {
-    // Checks the status of the url
-    const urlCheckResult = await checkUrlStatus(job.data.url)
-    // Updates the monitor and checks if it has changed from last check, recieving notification address data if it exists
-    const oldMonitor = await updateMonitorStatusAndReturnOldMonitor(job.data.monitorId, urlCheckResult)
+  console.log(`Job to check monitor ${job.data.monitorId} at ${job.data.url}`)
 
-    // If the status has changed and there is a discord notify address, add a notify job to the queueu
-    if (oldMonitor.lastStatus !== urlCheckResult.status && oldMonitor.discordWebhook.notify){
-      const oldStatus: urlStatus = {status: oldMonitor.lastStatus, timeChecked: oldMonitor.lastChecked}
+  // Checks the status of the url
+  const urlCheckResult = await checkUrlStatus(job.data.url)
+  
+  // Updates the monitor and checks if it has changed from last check, recieving notification address data if it exists
+  const oldMonitor = await updateMonitorStatusAndReturnOldMonitor(job.data.monitorId, urlCheckResult)
 
-      // Since notify is true, encrypted Url must be defined on document through schema validation
-      const encryptedUrl = oldMonitor.discordWebhook.encryptedUrl as string
+  // If the status has changed and there is a discord notify address, add a notify job to the queueu
+  if (oldMonitor.lastStatus !== urlCheckResult.status && oldMonitor.discordWebhook.notify){
+    const oldStatus: urlStatus = {status: oldMonitor.lastStatus, timeChecked: oldMonitor.lastChecked}
 
-      // Adds the notify job to the queue
-      await addDiscordStatusChangeNotificationJob(encryptedUrl, job.data.url, oldStatus, urlCheckResult)
-    }
-    
-  } catch (error) {
-    logger.error('error checking status of url', error)
-    throw error
-  }
+    // Since notify is true, encrypted Url must be defined on document through schema validation
+    const encryptedUrl = oldMonitor.discordWebhook.encryptedUrl as string
+
+    // Adds the notify job to the queue
+    await addDiscordStatusChangeNotificationJob(encryptedUrl, job.data.url, oldStatus, urlCheckResult)
+  } 
 
 }, {autorun: false, connection})
 

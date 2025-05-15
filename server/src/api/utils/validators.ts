@@ -49,32 +49,33 @@ export const NewMonitorSchema = z.object({
   discordWebhook: UnEncryptedDiscordWebhookObjectSchema.optional()
 })
 
+
+
+
+
+
 // Zod object schema for encrypted discord webhook data
 export const EncryptedDiscordWebhookObjectSchema = z.object({
   notify: z.boolean(),
   encryptedUrl: z.string().optional()
 })
 
-
-
-
-
-
+// Zod object schema for the processed discord webhook update schema 
+export const PartialEncryptedDiscordWebhookObjectSchema = EncryptedDiscordWebhookObjectSchema.partial()
 
 
 // PATCHING AN EXISTING MONITOR
 
 // Zod schema for parsing discord webhook patch data
-const DiscordWebhookPatchDataSchema = z.object({
+export const DiscordWebhookPatchDataSchema = z.object({
   notify: z.boolean(),
-  unEncryptedWebhook: z.string().url()
+  unEncryptedWebhook: z.string().url().or(z.null())
 }).partial()
 
 // Zod schema for parsing monitor patch data
 export const MonitorPatchDataSchema = z.object({
   url: z.string().url(),
-  interval: z.enum(['5', '15', '30']).transform(val => parseInt(val)),
-  discordWebhook: DiscordWebhookPatchDataSchema
+  interval: z.enum(['5', '15', '30']).transform(val => parseInt(val))
 }).partial()
 
 
