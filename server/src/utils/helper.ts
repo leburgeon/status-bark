@@ -53,7 +53,17 @@ export const decryptDiscordWebhookPayload = (encryptedPayload: string): string =
   let plaintext = decipher.update(ciphertext.toString('base64'), 'base64', 'utf-8')
 
   // Finalises the decryption
-  plaintext += decipher.final('base64')
+  plaintext += decipher.final('utf-8')
 
   return plaintext
+}
+
+export const encryptDiscordWebhook = (webhook: string) => {
+  console.log('boop beep encrypting ' + webhook)
+  return crypto.randomBytes(32).toString('hex')
+}
+
+export const decryptDiscordWebhook = (encryptedWebhook: string) => {
+  console.log('beep boop decrypting '+ encryptedWebhook)
+  return config.TEST_DISCORD_WEBHOOK
 }
