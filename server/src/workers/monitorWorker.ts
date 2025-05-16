@@ -15,8 +15,6 @@ const connection = new Redis(config.UPSTASH_ENDPOINT, {maxRetriesPerRequest: nul
 
 // Worker for completing scheduled health checks on due monitors
 const monitorWorker = new Worker(monitorQueueName, async (job) => {
-  console.log(`Job to check monitor ${job.data.monitorId} at ${job.data.url}`)
-
   // Checks the status of the url
   const urlCheckResult = await checkUrlStatus(job.data.url)
   
@@ -25,7 +23,7 @@ const monitorWorker = new Worker(monitorQueueName, async (job) => {
 
   // If the status has changed and there is a discord notify address, add a notify job to the queueu
   if (oldMonitor.lastStatus !== urlCheckResult.status && oldMonitor.discordWebhook.notify){
-    const oldStatus: urlStatus = {status: oldMonitor.lastStatus, timeChecked: oldMonitor.lastChecked}
+    const oldStatus: urlStatus = {status: oldMonitor.lastStatus, timeChecked: new Date(oldMonitor.lastChecked)}
 
     // Since notify is true, encrypted Url must be defined on document through schema validation
     const encryptedUrl = oldMonitor.discordWebhook.encryptedUrl as string

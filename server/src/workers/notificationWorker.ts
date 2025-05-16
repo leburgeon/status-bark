@@ -10,7 +10,6 @@ const connection = new Redis(config.UPSTASH_ENDPOINT, {maxRetriesPerRequest: nul
 // Worker for handling notification jobs
 const notificationWorker = new Worker(notificationQueueName, async (job) => {
 
-  console.log('notification worker picked up a job')
   // For handling discord notifications
   if (job.name === notifyDiscordOfStatusChangeJobName){
     const { monitorUrl, encryptedWebookUrl, oldStatus, newStatus } = job.data as DiscordStatusChangeNotificationJobData
