@@ -4,7 +4,7 @@ import { MonitorPatchData, NewMonitor, EncryptedDiscordWebhookObject, ProcessedD
 import Monitor from '../models/Monitor.js'
 import logger from '../../utils/logger.js'
 import mongoose, { isValidObjectId } from 'mongoose'
-import { encryptDiscordWebhook } from '../../utils/helper.js'
+import { encryptSymmetricIntoPayload } from '../../utils/helper.js'
 import { buildUpdate } from '../utils/helpers.js'
 
 const monitorRouter = express.Router()
@@ -47,7 +47,7 @@ monitorRouter.post('', authenticateAndExtractUser, parseNewMonitor, async (req: 
       // Checks if the unEncryptedWebhook is defined
       if (unEncryptedWebhook){
         // If one is provided, encrypts the webhook and adds it to the new document with notify
-        discordWebhookData.encryptedUrl = encryptDiscordWebhook(unEncryptedWebhook)
+        discordWebhookData.encryptedUrl = encryptSymmetricIntoPayload(unEncryptedWebhook)
         discordWebhookData.notify = notify
       }
 

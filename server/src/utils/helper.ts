@@ -23,7 +23,7 @@ export const encryptSymmetricIntoPayload = (webhook: string): string => {
   const iv = crypto.randomBytes(12)
 
   // Creates the cipher, using the key and the iv
-  const cipher = crypto.createCipheriv('aes-256-gcm', Buffer.from(config.WEBHOOK_ENCRYPTION_KEY, 'base64'), iv)
+  const cipher = crypto.createCipheriv('aes-256-gcm', Buffer.from(config.ENCRYPTION_KEY, 'base64'), iv)
 
   // Updates the created cipher with the webhook to encrypt and the encoding
   let ciphertext = cipher.update(webhook, 'utf-8', 'base64')
@@ -39,12 +39,12 @@ export const encryptSymmetricIntoPayload = (webhook: string): string => {
   return payload
 }
 
-export const decryptDiscordWebhookPayload = (encryptedPayload: string): string => {
+export const decryptSymmetricFromPayload = (encryptedPayload: string): string => {
   // Seperates the elements for decryption from the payload
   const {iv, tag, ciphertext} = seperateEncryptedPayload(encryptedPayload)
 
   // Creates the decypher object using the key and the initialisation vector
-  const decipher = crypto.createDecipheriv('aes-256-gcm', Buffer.from(config.WEBHOOK_ENCRYPTION_KEY, 'base64'), iv)
+  const decipher = crypto.createDecipheriv('aes-256-gcm', Buffer.from(config.ENCRYPTION_KEY, 'base64'), iv)
 
   // Sets the authorisation tag
   decipher.setAuthTag(tag)
@@ -56,14 +56,4 @@ export const decryptDiscordWebhookPayload = (encryptedPayload: string): string =
   plaintext += decipher.final('utf-8')
 
   return plaintext
-}
-
-export const encryptDiscordWebhook = (webhook: string) => {
-  console.log('boop beep encrypting ' + webhook)
-  return crypto.randomBytes(32).toString('hex')
-}
-
-export const decryptDiscordWebhook = (encryptedWebhook: string) => {
-  console.log('beep boop decrypting '+ encryptedWebhook)
-  return config.TEST_DISCORD_WEBHOOK
 }

@@ -6,7 +6,7 @@ import { MongooseError } from 'mongoose'
 import jwt from 'jsonwebtoken'
 import config from '../../utils/config.js'
 import User from '../models/User.js'
-import { encryptDiscordWebhook } from '../../utils/helper.js'
+import { encryptSymmetricIntoPayload } from '../../utils/helper.js'
 
 // Skeleton method for parsing a request body with a zod schema
 const parseRequestBodyWith = (schema: ZodSchema, req: Request, next: NextFunction) => {
@@ -48,7 +48,7 @@ export const parseAndProcessDiscordWebhookPatchData = (req: Request, _res: Respo
     // Processes the discord webhook url update if present
     if (Object.keys(req.body).includes('unEncryptedWebhook')){
       if (req.body.unEncryptedWebhook){
-        req.body.encryptedUrl = encryptDiscordWebhook(req.body.unEncryptedWebhook)
+        req.body.encryptedUrl = encryptSymmetricIntoPayload(req.body.unEncryptedWebhook)
       } else {
         req.body.encryptedUrl = null
       }
