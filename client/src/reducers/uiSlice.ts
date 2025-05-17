@@ -1,15 +1,26 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit"
+
+
+interface uiState {
+  snackbar: {
+    message: string,
+    severity: 'error' | 'info' | 'success' | 'warning',
+    open: boolean
+  }
+}
+
+const initialState: uiState = {
+  snackbar: { message: '', severity: 'error', open: false }
+}
 
 const uiSlice = createSlice({
   name: 'ui',
-  initialState: {
-    snackbar: { message: '', severity: 'error', open: false },
-  },
+  initialState,
   reducers: {
-    showError: (state, action) => {
+    showError: (state, action: PayloadAction<string>) => {
       state.snackbar = {message: action.payload, severity: 'error', open: true}
     },
-    hideSnackbar: (state, _action) => {
+    hideSnackbar: (state) => {
       state.snackbar.open = false
     }
   }

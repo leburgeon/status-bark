@@ -2,7 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import {theme} from './assets/theme.ts'
-import { ThemeProvider } from '@mui/material'
+import { Container, ThemeProvider } from '@mui/material'
 import {CssBaseline} from '@mui/material'
 import { Provider } from 'react-redux'
 import { BrowserRouter as Router } from 'react-router-dom'
@@ -13,11 +13,13 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Provider store={store}>
       <Router>
-        <ThemeProvider theme={theme}>
-          <CssBaseline>
-            <App />
-          </CssBaseline>
-        </ThemeProvider>
+        <Container>
+          <ThemeProvider theme={theme}>
+            <CssBaseline>
+              <App />
+            </CssBaseline>
+          </ThemeProvider>          
+        </Container>
       </Router>
     </Provider>
   </StrictMode>,

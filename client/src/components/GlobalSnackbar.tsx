@@ -1,11 +1,11 @@
-import { useDispatch, useSelector } from "react-redux"
+import { useAppDispatch, useAppSelector } from "../hooks"
 import { Snackbar } from "@mui/material"
 import { Alert } from "@mui/material"
 import { hideSnackbar } from "../reducers/uiSlice"
 
 const GlobalSnackbar = () => {
-  const dispatch = useDispatch()
-  const { snackbar } = useSelector((state) => state.ui)
+  const dispatch = useAppDispatch()
+  const { snackbar } = useAppSelector((state) => state.ui)
 
   return (
     <Snackbar
@@ -13,9 +13,11 @@ const GlobalSnackbar = () => {
       autoHideDuration={6000}
       onClose={() => dispatch(hideSnackbar({}))}
     >
-      <Alert severity={snackbar.severity} onClose={() => dispatch(hideSnackbar({}))}>
+      <Alert severity={snackbar.severity} onClose={() => dispatch(hideSnackbar())}>
         {snackbar.message}
       </Alert>
     </Snackbar>
   )
 }
+
+export default GlobalSnackbar
