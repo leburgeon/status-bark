@@ -1,11 +1,10 @@
 import { Button } from "@mui/material"
 import GlobalSnackbar from "./components/GlobalSnackbar"
 import { showError } from "./reducers/uiSlice"
-import { useDispatch, UseDispatch } from "react-redux"
+import { useAppDispatch } from "./hooks"
 
 const App = () => {
-  const dispatch = useDispatch()
-
+  const dispatch = useAppDispatch()
   return (
     <>
       <GlobalSnackbar></GlobalSnackbar>
