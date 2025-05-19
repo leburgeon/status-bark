@@ -1,16 +1,52 @@
 import axios from "axios"
-import { z } from 'zod'
+import { UserState, UserDataSchema, UserData } from "../reducers/userSlice"
 
-const userSchema = z.object({
-  email: z.string().email(),
-  userId: z.string(),
-  token: z.string()
-})
+// Method for setting the global authorisation token under the bearer schema
+const setGlobalAxiosAuthToken = (token:string) => {
+  axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+}
 
-const authenticate = async (credentials: {username: string, password: string}):Promise<{email: string, userId: string, token: string}> => {
+// Method for clearing the global auth token
+const clearGlobalAxiosAuthToken = () => {
+  delete axios.defaults.headers.common['Authorization']
+}
+
+// Method for returning parsed user data from local storagee
+const getUserFromLocal = (): UserState => {
+
+  // Gets the json data from local
+  const userFromLocal = window.localStorage.getItem('status-bark-user')
+
+  // If null, returns
+  if (!userFromLocal){
+    return {loggedIn: false}
+  }
+
+  try {
+    // Parses the local user data
+    const userData = UserDataSchema.parse(JSON.parse(userFromLocal))
+
+    // Sets the authorisation header for the axios lib
+    setGlobalAxiosAuthToken(userData.token)
+
+    // Then returns the user data
+    return {user: userData, loggedIn: true}
+
+  } catch {
+    window.localStorage.removeItem('status-bark-user')
+    clearGlobalAxiosAuthToken()
+    return {loggedIn: false}
+  }
+}
+
+// Method for attempting to authenticate a user and set the global auth token
+const authenticate = async (credentials: {username: string, password: string}):Promise<UserData> => {
   const {data} = await axios.post('/api/users/login', credentials)
-  const userData = userSchema.parse(data)
+  const userData = UserDataSchema.parse(data)
   return userData
 }
 
-export default {authenticate}
+export default {
+  authenticate,
+  getUserFromLocal
+}

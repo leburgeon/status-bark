@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 
-
 interface uiState {
   snackbar: {
     message: string,

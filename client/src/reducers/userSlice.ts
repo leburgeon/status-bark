@@ -1,21 +1,20 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
+import { z } from "zod"
+import authService from "../services/authService"
 
-interface userState {
-  loggedIn: boolean,
-  user?: {
-    id: string,
-    email: string,
-    token: string
-  }
-}
+export const UserDataSchema = z.object({
+  id: z.string(),
+  email: z.string().email(),
+  token: z.string()
+})
 
-const initialState: userState = {
-  loggedIn: false
-}
+export type UserData = z.infer<typeof UserDataSchema>
+
+export interface UserState {user?: UserData, loggedIn: boolean}
 
 const userSlice = createSlice({
   name: 'user',
-  initialState,
+  initialState: authService.getUserFromLocal(),
   reducers: {
     setUserState: (state, action: PayloadAction<{email: string, token: string, id: string}>) => {
       const {email, token, id} = action.payload
@@ -33,3 +32,13 @@ export const { setUserState, clearUserState } = userSlice.actions
 
 export default userSlice.reducer
 
+// Thunk for attempting to log a user in with credentials
+export const login = (credentials: {username: string, password: string}) => {
+  return async (dispatch) => {
+    try {
+      authService.authenticate(credentials)
+    }
+  }
+}
+
+// Function for logging a user out including clearing local storage
