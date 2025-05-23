@@ -43,10 +43,18 @@ const getUserFromLocal = (): UserState => {
 const authenticate = async (credentials: {username: string, password: string}):Promise<UserData> => {
   const {data} = await axios.post('/api/users/login', credentials)
   const userData = UserDataSchema.parse(data)
+  setGlobalAxiosAuthToken(userData.token)
   return userData
+}
+
+// Method for logging a user out, including claring any local user data and auth tokens
+const clearAuthData = () => {
+  window.localStorage.removeItem('status-bark-user')
+  clearGlobalAxiosAuthToken()
 }
 
 export default {
   authenticate,
-  getUserFromLocal
+  getUserFromLocal,
+  clearAuthData
 }
