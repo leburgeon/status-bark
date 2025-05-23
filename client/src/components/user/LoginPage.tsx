@@ -10,12 +10,8 @@ const LoginPage = () => {
   const dispatch = useAppDispatch()
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    try{
-      event.preventDefault()
-      dispatch(login({email, password}))
-    } catch (error){
-      dispatch()
-    }
+    event.preventDefault()
+    dispatch(login({email, password}))   
   }
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>

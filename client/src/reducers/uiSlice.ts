@@ -1,4 +1,5 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit"
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { createSlice, Dispatch, PayloadAction } from "@reduxjs/toolkit"
 
 interface uiState {
   snackbar: {
@@ -28,6 +29,23 @@ const uiSlice = createSlice({
 export const { showError, hideSnackbar } = uiSlice.actions
 export default uiSlice.reducer
 
-export const extractErrorMessage = (error: unknown) => {
-  
+export const handleErrorsMessage = (error: unknown) => {
+  let message = ''
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'isAxiosError' in error &&
+    (error as any).isAxiosError === true
+  ) {
+    const axiosError = error as any
+    message = axiosError.response?.data?.error || axiosError.message || 'Unexpected Error'
+  } else if (error instanceof Error) {
+    message = error.message
+  } else {
+    message = 'Unexpected Error'
+  }
+
+  return (dispatch: Dispatch) => {
+    dispatch(showError(message))
+  }
 }

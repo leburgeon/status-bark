@@ -1,6 +1,8 @@
-import { createSlice, Dispatch, PayloadAction } from "@reduxjs/toolkit"
+import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { z } from "zod"
 import authService from "../services/authService"
+import { handleErrorsMessage } from "./uiSlice"
+import { AppDispatch } from '../store' // Adjust the path to your store file
 
 export const UserDataSchema = z.object({
   id: z.string(),
@@ -34,15 +36,20 @@ export default userSlice.reducer
 
 // Thunk for attempting to log a user in with credentials
 export const login = (credentials: {email: string, password: string}) => {
-  return async (dispatch: Dispatch) => {
-    const userData = await authService.authenticate(credentials)
-    dispatch(setUserState(userData))
+  return async (dispatch: AppDispatch) => {
+    try {
+      const userData = await authService.authenticate(credentials)
+      dispatch(setUserState(userData))
+    } catch (error) {
+      console.error(error)
+      dispatch(handleErrorsMessage(error))
+    }
   }
 }
 
 // Thunk for logging a user out including clearing local storage and auth data
 export const logout = () => {
-  return (dispatch: Dispatch) => {
+  return (dispatch: AppDispatch) => {
     authService.clearAuthData()
     dispatch(clearUserState())
   }
