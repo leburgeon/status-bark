@@ -30,6 +30,7 @@ export const { showError, hideSnackbar } = uiSlice.actions
 export default uiSlice.reducer
 
 export const handleErrorsMessage = (error: unknown) => {
+  console.error(error)
   let message = ''
   if (
     typeof error === 'object' &&

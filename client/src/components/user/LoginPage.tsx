@@ -2,12 +2,15 @@ import { useState } from "react"
 import { useAppDispatch } from "../../hooks"
 import { login } from "../../reducers/userSlice"
 import { Button, TextField, Box, Typography, Paper } from "@mui/material"
+import { useNavigate } from "react-router-dom"
 
 const LoginPage = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
   const dispatch = useAppDispatch()
+
+  const navigate = useNavigate()
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -38,7 +41,7 @@ const LoginPage = () => {
           />
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
             <Button type="submit" variant="contained" color="primary">Login</Button>
-            <Button variant="outlined" color="secondary">Register</Button>
+            <Button variant="outlined" color="secondary" onClick={() => {navigate('/register')}}>Register</Button>
           </Box>
         </form>
       </Paper>
