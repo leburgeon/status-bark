@@ -27,3 +27,7 @@ const uiSlice = createSlice({
 
 export const { showError, hideSnackbar } = uiSlice.actions
 export default uiSlice.reducer
+
+export const extractErrorMessage = (error: unknown) => {
+  
+}

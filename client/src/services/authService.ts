@@ -40,7 +40,7 @@ const getUserFromLocal = (): UserState => {
 }
 
 // Method for attempting to authenticate a user and set the global auth token
-const authenticate = async (credentials: {username: string, password: string}):Promise<UserData> => {
+const authenticate = async (credentials: {email: string, password: string}):Promise<UserData> => {
   const {data} = await axios.post('/api/users/login', credentials)
   const userData = UserDataSchema.parse(data)
   setGlobalAxiosAuthToken(userData.token)
