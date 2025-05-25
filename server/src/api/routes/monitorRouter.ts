@@ -20,7 +20,7 @@ monitorRouter.post('', authenticateAndExtractUser, parseNewMonitor, async (req: 
     return
   }
 
-  const { url, interval} = req.body
+  const {nickname, url, interval} = req.body
 
   // Ensures that the montior does not exist already in the monitors
   if (usersMonitors.some(monitor => {
@@ -32,7 +32,7 @@ monitorRouter.post('', authenticateAndExtractUser, parseNewMonitor, async (req: 
   
   try {
     // For attempting to create and save the new monitor
-    const newMonitor = new Monitor({url, interval, user: req.user?._id.toString()})
+    const newMonitor = new Monitor({nickname, url, interval, user: req.user?._id.toString()})
 
     // Checks if there is a discord webhoook provided
     const {discordWebhook} = req.body
@@ -124,7 +124,7 @@ monitorRouter.patch('/:id', authenticateAndExtractUser, parsePartialMontiorPatch
     return
   }
   
-  const updateData = buildUpdate<MonitorPatchData>(req.body, ['url', 'interval'], '')
+  const updateData = buildUpdate<MonitorPatchData>(req.body, ['url', 'interval', 'nickname'], '')
 
   // Attempts to make the updates and then return the updated monitor
   try {

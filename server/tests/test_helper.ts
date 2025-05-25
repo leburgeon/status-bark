@@ -27,6 +27,7 @@ const userToAdd = {
 // Inital monitor data
 const initialMonitors = [
   {
+    nickname: 'google',
     url: 'http://google.com',
     interval: 5,
     discordWebhook: {
@@ -35,6 +36,7 @@ const initialMonitors = [
     }
   },
   {
+    nickname: 'facebook',
     url: 'http://facebook.com',
     interval: 5,
     discordWebhook: {
@@ -43,6 +45,7 @@ const initialMonitors = [
     }
   },
   {
+    nickname: 'notexist',
     url: 'http://alwaysnotthereintime.com',
     interval: 5,
     discordWebhook: {
@@ -54,6 +57,7 @@ const initialMonitors = [
 
 // Monitor info for adding a new monitor
 const monitorToAdd = {
+  nickname: 'github',
   url: 'http://github.com',
   interval: '5',
   discordWebhook: {
@@ -65,7 +69,8 @@ const monitorToAdd = {
 // Info for sending a monitor update
 const monitorUpdateData = {
   url: 'http://ebay.com',
-  interval: '15'
+  interval: '15',
+  nickname: 'ebay'
 }
 
 

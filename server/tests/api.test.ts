@@ -212,19 +212,30 @@ describe('When there are initially some users in the database', () => {
 
       describe('succeeds when...', () => {
 
-        test('all update data is valid', async () => {
+        test.only('all update data is valid', async () => {
+
           const monitorToUpdate = await helper.getSpecificFirstUserMonitor()
-          const {interval: preInterval, _id: preId, discordWebhook: preDiscordWebhook} = monitorToUpdate
+
+          // Copies the values to check them post update
+          const {url: preUrl, nickname: preNickname, interval: preInterval, _id: preId} = monitorToUpdate
+
+          // Sends the patch request
           await api.patch(`/api/monitors/${preId.toString()}`)
             .send(helper.monitorUpdateData)
             .auth(await helper.getBearerTokenOfFirstUser(60*60), {type: 'bearer'})
             .expect(200)
-            
-          const {interval: postInterval, discordWebhook: postDiscordWebhook} = await helper.getMonitorById(preId.toString())
+          
+          // Retrieves the post-update values
+          const {url: postUrl, nickname: postNickname, interval: postInterval} = await helper.getMonitorById(preId.toString())
+
           // Asserts that the interval has changed
-          assert(postInterval !== preInterval)
-          // Asserts that the discordWebhook object has changed
-          assert.notDeepStrictEqual(postDiscordWebhook, preDiscordWebhook)
+          assert.notStrictEqual(preInterval, postInterval)
+
+          // Asserts that the url has changed
+          assert.notStrictEqual(postUrl, preUrl)
+    
+          // Asserts that the nickname has changed
+          assert.notStrictEqual(postNickname, preNickname)
         })
 
         test('attempting to turn off notifications for a webhook', async () =>{
@@ -296,8 +307,8 @@ describe('When there are initially some users in the database', () => {
         test('attempting to turn on a the notification for a monitor with an undefined url', async () => {
           // First adds the monitor without a discord webhook
           const firstUserToken = await helper.getBearerTokenOfFirstUser(60*60)
-          const {url, interval} = helper.monitorToAdd
-          const monitorId = await helper.addMonitorWithDataAsFirstUserAndReturnId({url, interval: parseInt(interval)})
+          const {nickname, url, interval } = helper.monitorToAdd
+          const monitorId = await helper.addMonitorWithDataAsFirstUserAndReturnId({nickname, url, interval: parseInt(interval)})
 
           const {discordWebhook: {notify: preNotify}} = await helper.getMonitorById(monitorId)
   

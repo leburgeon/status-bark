@@ -24,6 +24,11 @@ const monitorSchema = new Schema({
     type: mongoose.SchemaTypes.ObjectId,
     required: true
   },
+  nickname: {
+    type: String,
+    required: true,
+    minLength: 3
+  },
   url: {
     type: String,
     required: true
