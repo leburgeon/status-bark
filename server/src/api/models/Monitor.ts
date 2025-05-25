@@ -27,7 +27,8 @@ const monitorSchema = new Schema({
   nickname: {
     type: String,
     required: true,
-    minLength: 3
+    minLength: 3,
+    maxLength: 15
   },
   url: {
     type: String,

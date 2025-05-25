@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom"
 import { useAppSelector } from "./hooks"
 import LoginPage from "./components/user/LoginPage"
 import RegisterPage from "./components/user/RegisterPage"
-import MonitorsPage from "./components/dashboard/MonitorsPage"
+import MonitorsPage from "./components/dashboard/monitors/MonitorsPage"
 
 const App = () => {
   const loggedIn = useAppSelector(state => state.user.loggedIn)

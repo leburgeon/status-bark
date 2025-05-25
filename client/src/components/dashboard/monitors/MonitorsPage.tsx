@@ -1,4 +1,4 @@
-import { useAppSelector } from "../../hooks"
+import { useAppSelector } from "../../../hooks"
 import Monitor from "./Monitor"
 
 const MonitorsPage = () => {
