@@ -9,6 +9,16 @@ import { buildUpdate } from '../utils/helpers.js'
 
 const monitorRouter = express.Router()
 
+// Route for retrieving the monitors of a user
+monitorRouter.get('', authenticateAndExtractUser, async (req: Request, res: Response, next: NextFunction) => {
+
+  // Finds the monitors associated with the user extracted from the token
+  const usersMonitors = await Monitor.find({user: req.user?._id.toString()})
+
+  res.status(200).json(usersMonitors)
+  return
+})
+
 // Route for creating a new monitor
 monitorRouter.post('', authenticateAndExtractUser, parseNewMonitor, async (req: Request<unknown, unknown, NewMonitor>, res: Response, next: NextFunction) => {
   // For fetching the monitors already on this account
