@@ -89,6 +89,18 @@ const RegisterPage = () => {
         <Button type="submit" variant="contained" color="primary" fullWidth>
           Register
         </Button>
+        <Typography align="center" sx={{ my: -1, color: 'text.secondary' }}>
+          (or)
+        </Typography>
+        <Button
+          variant="outlined"
+          color="secondary"
+          fullWidth
+          onClick={() => navigate('/login')}
+          sx={{ mt: 0 }}
+        >
+          Login
+        </Button>
       </form>
     </Box>
   )
