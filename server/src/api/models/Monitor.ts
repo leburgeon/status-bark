@@ -52,7 +52,32 @@ const monitorSchema = new Schema({
       notify: false
     }
   }
-}, {timestamps: true})
+}, {timestamps: true,
+  toJSON: {
+    transform: (doc, ret) => {
+      // Renames the id
+      ret.id = doc._id.toString()
+
+      // Removes unncessary
+      delete ret._id
+      delete ret.__v
+      delete ret.updatedAt
+      delete ret.discordWebhook._id
+      delete ret.user
+
+      // Handles removing the encrypted discord data if defined
+      if (ret.discordWebhook.encryptedUrl){
+        ret.discordWebhook.urlPresent = true
+        delete ret.discordWebhook.encryptedUrl
+      } else {
+        ret.discordWebhook.urlPresent = false
+      }
+
+      // Returns the transformed doc
+      return ret
+    }
+  }
+})
 
 export type MonitorType = InferSchemaType<typeof monitorSchema>
 export type MonitorDocument = HydratedDocument<MonitorType>
