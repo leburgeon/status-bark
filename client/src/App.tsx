@@ -12,7 +12,7 @@ const App = () => {
       <GlobalSnackbar/>
       <Routes>
         <Route path="/login" element={loggedIn ? <Navigate to='/'/> : <LoginPage/>}/>
-        <Route path='/register' element={<RegisterPage/>}/>
+        <Route path='/register' element={loggedIn ? <Navigate to='/'/> : <RegisterPage/>}/>
         <Route path='/' element={loggedIn ? <MonitorsPage/> : <LoginPage/>}/>
       </Routes>
     </>

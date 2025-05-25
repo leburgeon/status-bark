@@ -44,6 +44,7 @@ const authenticate = async (credentials: {email: string, password: string}):Prom
   const {data} = await axios.post('/api/users/login', credentials)
   const userData = UserDataSchema.parse(data)
   setGlobalAxiosAuthToken(userData.token)
+  window.localStorage.setItem('status-bark-user', JSON.stringify(userData))
   return userData
 }
 

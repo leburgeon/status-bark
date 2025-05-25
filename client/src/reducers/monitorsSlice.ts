@@ -5,7 +5,9 @@ export const MonitorSchema = z.object({
   id: z.string(),
   nickname: z.string(),
   url: z.string(),
-  lastStatus: z.string(),
+  interval: z.number(),
+  lastStatus: z.string().date(),
+  lastChecked: z.string().date(),
   createdAt: z.string(),
   discordWebhook: z.object({
     notify: z.boolean(),
@@ -15,12 +17,14 @@ export const MonitorSchema = z.object({
 
 type Monitor = z.infer<typeof MonitorSchema>
 
-const initialState: {monitors: Monitor[]} = {monitors: [
+const initialState: {monitorsArray: Monitor[]} = {monitorsArray: [
   {id: 'fooid',
+    interval: 5,
     nickname: 'foonick',
     url: 'ooo.com',
     lastStatus: 'UP',
     createdAt: "2025-05-16T10:54:42.965Z",
+    lastChecked: "2025-05-16T10:54:42.965Z",
     discordWebhook: {notify: false, urlPresent: false}
   }
 ]}
@@ -30,13 +34,13 @@ const monitorSlice = createSlice({
   initialState,
   reducers: {
     setMonitors: (state, action: PayloadAction<Monitor[]>) => {
-      state.monitors = action.payload
+      state.monitorsArray = action.payload
     },
     clearMonitors: (state) => {
-      state.monitors = []
+      state.monitorsArray = []
     },
     updateMonitor: (state, action: PayloadAction<Monitor>) => {
-      state.monitors = state.monitors.map(monitor => {
+      state.monitorsArray = state.monitorsArray.map(monitor => {
         if (monitor.id !== action.payload.id){
           return monitor
         } else {
@@ -45,7 +49,7 @@ const monitorSlice = createSlice({
       })
     },
     deleteMonitor: (state, action: PayloadAction<string>) => {
-      state.monitors = state.monitors.filter(monitor => monitor.id !== action.payload)
+      state.monitorsArray = state.monitorsArray.filter(monitor => monitor.id !== action.payload)
     },
 
   }
