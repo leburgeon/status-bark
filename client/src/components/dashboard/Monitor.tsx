@@ -1,4 +1,4 @@
-const Monitor = () => {
+const Monitor = ({url, }) => {
   return (
     <>Monitor ting</>
   )

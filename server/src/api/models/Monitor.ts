@@ -52,34 +52,39 @@ const monitorSchema = new Schema({
       notify: false
     }
   }
-}, {timestamps: true,
-  toJSON: {
-    transform: (doc, ret) => {
-      // Renames the id
-      ret.id = doc._id.toString()
+}, {timestamps: true})
 
-      // Removes unncessary
-      delete ret._id
-      delete ret.__v
-      delete ret.updatedAt
-      delete ret.discordWebhook._id
-      delete ret.user
-
-      // Handles removing the encrypted discord data if defined
-      if (ret.discordWebhook.encryptedUrl){
-        ret.discordWebhook.urlPresent = true
-        delete ret.discordWebhook.encryptedUrl
-      } else {
-        ret.discordWebhook.urlPresent = false
-      }
-
-      // Returns the transformed doc
-      return ret
-    }
-  }
-})
-
+// Inferes the type of the documets returned from this shcema
 export type MonitorType = InferSchemaType<typeof monitorSchema>
 export type MonitorDocument = HydratedDocument<MonitorType>
 
+// Sets the transformation method on the shcema. 
+// This needs to be done after inferring the types as this will modify the returned type
+monitorSchema.set('toJSON',
+  {transform: (doc, ret) => {
+    // Renames the id
+    ret.id = doc._id.toString()
+
+    // Removes unncessary
+    delete ret._id
+    delete ret.__v
+    delete ret.updatedAt
+    delete ret.discordWebhook._id
+    delete ret.user
+
+    // Handles removing the encrypted discord data if defined
+    if (ret.discordWebhook.encryptedUrl){
+      ret.discordWebhook.urlPresent = true
+      delete ret.discordWebhook.encryptedUrl
+    } else {
+      ret.discordWebhook.urlPresent = false
+    }
+
+    // Returns the transformed doc
+    return ret
+   }
+  } 
+)
+
 export default model<MonitorType>('Monitor', monitorSchema)
+

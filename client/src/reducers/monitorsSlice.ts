@@ -15,7 +15,15 @@ export const MonitorSchema = z.object({
 
 type Monitor = z.infer<typeof MonitorSchema>
 
-const initialState: {monitors: Monitor[]} = {monitors: []}
+const initialState: {monitors: Monitor[]} = {monitors: [
+  {id: 'fooid',
+    nickname: 'foonick',
+    url: 'ooo.com',
+    lastStatus: 'UP',
+    createdAt: "2025-05-16T10:54:42.965Z",
+    discordWebhook: {notify: false, urlPresent: false}
+  }
+]}
 
 const monitorSlice = createSlice({
   name: 'monitors',
@@ -38,7 +46,8 @@ const monitorSlice = createSlice({
     },
     deleteMonitor: (state, action: PayloadAction<string>) => {
       state.monitors = state.monitors.filter(monitor => monitor.id !== action.payload)
-    }
+    },
+
   }
 })
 
