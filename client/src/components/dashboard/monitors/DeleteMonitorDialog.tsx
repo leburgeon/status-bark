@@ -41,6 +41,8 @@ const DeleteMonitorDialog = ({ open, onClose, onConfirm, monitorNickname }: Dele
           <Stack spacing={2}>
             <DialogContentText sx={{ color: theme.palette.text.secondary }}>
               Are you sure you want to delete <b>{`"${monitorNickname}"`}</b>?<br />
+              This will delete <b>all</b> data for this Monitor.<br/>
+              It cannot be undone! <br/><br/>
               <span style={{ color: theme.palette.error.main, fontWeight: 500 }}>
                 Type <b>confirm</b> below to proceed.
               </span>

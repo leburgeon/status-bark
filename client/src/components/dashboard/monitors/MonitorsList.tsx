@@ -3,16 +3,32 @@ import { Box, Typography, Paper, Button, Stack, Fade } from '@mui/material'
 import { useAppDispatch, useAppSelector } from "../../../hooks"
 import Monitor from "./MonitorListItem"
 import AddMonitorDialog from './AddMonitorDialog'
-import {  createMonitor, initialiseMonitors, NewMonitorData } from '../../../reducers/monitorsSlice'
+import DeleteMonitorDialog from './DeleteMonitorDialog'
+import { createMonitor, initialiseMonitors, deleteMonitor, NewMonitorData, Monitor as MonitorType } from '../../../reducers/monitorsSlice'
 
 const MonitorsList = () => {
   const monitors = useAppSelector(store => store.monitors.monitorsArray)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [selectedMonitor, setSelectedMonitor] = useState<MonitorType | null>(null)
   const dispatch = useAppDispatch()
 
   const handleAddMonitor = (data: NewMonitorData) => {
     dispatch(createMonitor(data))
     setDialogOpen(false)
+  }
+
+  const handleDeleteClick = (monitor: MonitorType) => {
+    setSelectedMonitor(monitor)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = () => {
+    if (selectedMonitor) {
+      dispatch(deleteMonitor(selectedMonitor.id))
+    }
+    setDeleteDialogOpen(false)
+    setSelectedMonitor(null)
   }
 
   useEffect(() => {
@@ -31,14 +47,8 @@ const MonitorsList = () => {
           ) : (
             monitors.map(monitor => <Fade in key={monitor.id}><Box>
               <Monitor 
-                id={monitor.id}
-                url={monitor.url}
-                nickname={monitor.nickname}
-                interval={monitor.interval}
-                lastStatus={monitor.lastStatus}
-                lastChecked={monitor.lastChecked}
-                createdAt={monitor.createdAt}
-                discordWebhook={monitor.discordWebhook}
+                {...monitor}
+                onDeleteClick={() => handleDeleteClick(monitor)}
               />
             </Box></Fade>)
           )}
@@ -56,6 +66,12 @@ const MonitorsList = () => {
         </Box>
       </Paper>
       <AddMonitorDialog open={dialogOpen} onClose={() => setDialogOpen(false)} onAdd={handleAddMonitor} />
+      <DeleteMonitorDialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        monitorNickname={selectedMonitor?.nickname || ''}
+      />
     </Box>
   )
 }
