@@ -91,7 +91,7 @@ monitorRouter.delete('/:id', authenticateAndExtractUser, async (req: Request, re
   // Attempts to delete the 
   try {
     await Monitor.findByIdAndDelete(monitorToDelete._id.toString())
-    res.status(410).json({data: 'Successfuly deleted'})
+    res.status(204).json({data: 'Successfuly deleted'})
   } catch (error) {
     logger.error('Error deleting a monitor', error)
     res.status(500).json({error: 'Internal server error'})
