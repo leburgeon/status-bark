@@ -49,7 +49,7 @@ export const login = (credentials: {email: string, password: string}) => {
 
 // Thunk for logging a user out including clearing local storage and auth data
 export const logout = () => {
-  return (dispatch: AppDispatch) => {
+  return async (dispatch: AppDispatch) => {
     authService.clearAuthData()
     dispatch(clearUserState())
   }

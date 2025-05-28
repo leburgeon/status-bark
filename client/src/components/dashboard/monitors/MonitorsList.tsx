@@ -1,7 +1,7 @@
 import { useAppSelector } from "../../../hooks"
-import Monitor from "./Monitor"
+import Monitor from "./MonitorListItem"
 
-const MonitorsPage = () => {
+const MonitorsList = () => {
   const monitors = useAppSelector(store => store.monitors.monitorsArray)
 
   return (
@@ -9,6 +9,7 @@ const MonitorsPage = () => {
       {monitors.map(monitor => <Monitor 
         key={monitor.id}
         id={monitor.id}
+        url={monitor.url}
         nickname={monitor.nickname}
         interval={monitor.interval}
         lastStatus={monitor.lastStatus}
@@ -20,4 +21,4 @@ const MonitorsPage = () => {
   )
 }
 
-export default MonitorsPage
+export default MonitorsList

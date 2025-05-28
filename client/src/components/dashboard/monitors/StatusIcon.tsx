@@ -3,14 +3,14 @@ import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined'
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { Tooltip } from '@mui/material';
 
-const MonitorStatusIcon = ({lastStatus}) => {
+const StatusIcon = ({lastStatus} : {lastStatus: 'UP' | 'DOWN' | 'NOTCHECKED'}) => {
   return (<Tooltip title={lastStatus}>
     {lastStatus === 'UP'
     ? <CheckCircleOutlineIcon color="success" fontSize="large"/>
     : lastStatus === 'DOWN'
       ? <CancelOutlinedIcon sx={{color: 'orangered'}} color="primary" fontSize="large"/>
-      : <MoreHorizIcon label color="primary" fontSize='large' />}
+      : <MoreHorizIcon color="primary" fontSize='large' />}
   </Tooltip>)
 }
 
-export default MonitorStatusIcon
+export default StatusIcon

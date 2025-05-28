@@ -6,7 +6,7 @@ export const MonitorSchema = z.object({
   nickname: z.string(),
   url: z.string(),
   interval: z.number(),
-  lastStatus: z.string().date(),
+  lastStatus: z.enum(['UP', 'DOWN', 'NOTCHECKED']),
   lastChecked: z.string().date(),
   createdAt: z.string(),
   discordWebhook: z.object({
@@ -15,14 +15,22 @@ export const MonitorSchema = z.object({
   })
 })
 
-type Monitor = z.infer<typeof MonitorSchema>
+export type Monitor = z.infer<typeof MonitorSchema>
 
 const initialState: {monitorsArray: Monitor[]} = {monitorsArray: [
   {id: 'fooid',
     interval: 5,
     nickname: 'foonick',
-    url: 'ooo.com',
+    url: 'ooalkdsjfhaksljdfhklsadhflkdso.com',
     lastStatus: 'UP',
+    createdAt: "2025-05-16T10:54:42.965Z",
+    lastChecked: "2025-05-16T10:54:42.965Z",
+    discordWebhook: {notify: true, urlPresent: true}
+  },{id: 'fooid',
+    interval: 5,
+    nickname: 'foonick',
+    url: 'ooasdfasdfffffffffo.com',
+    lastStatus: 'NOTCHECKED',
     createdAt: "2025-05-16T10:54:42.965Z",
     lastChecked: "2025-05-16T10:54:42.965Z",
     discordWebhook: {notify: false, urlPresent: false}
