@@ -70,14 +70,14 @@ const monitorSlice = createSlice({
     addMonitor: (state, action: PayloadAction<Monitor>) => {
       state.monitorsArray.push(action.payload)
     },
-    deleteMonitor: (state, action: PayloadAction<string>) => {
+    removeMonitor: (state, action: PayloadAction<string>) => {
       state.monitorsArray = state.monitorsArray.filter(monitor => monitor.id !== action.payload)
     },
 
   }
 })
 
-export const {setMonitors, clearMonitors, addMonitor} = monitorSlice.actions
+export const {setMonitors, clearMonitors, addMonitor, removeMonitor} = monitorSlice.actions
 
 export const createMonitor = (data: NewMonitorData) => {
   return async (dispatch: Dispatch) => {
@@ -86,7 +86,6 @@ export const createMonitor = (data: NewMonitorData) => {
       const newMonitor = MonitorSchema.parse(response.data)
       dispatch(addMonitor(newMonitor))
     } catch (error: unknown) {
-      console.error(error)
       let errorMessage = 'Error creating monitor'
       if (error instanceof Error){
         errorMessage += error.message
@@ -100,12 +99,25 @@ export const initialiseMonitors = () => {
   return async (dispatch:Dispatch) => {
     try {
       const response = await monitorService.getMonitors()
-      console.log(response.data)
       const monitorsArray = MonitorSchema.array().parse(response.data)
       dispatch(setMonitors(monitorsArray))
     } catch (error) {
-      console.error(error)
       let errorMessage = 'Error fetching monitors'
+      if (error instanceof Error){
+        errorMessage += error.message
+      }
+      dispatch(showError(errorMessage))
+    }
+  }
+}
+
+export const deleteMonitor = (id: string) => {
+  return async (dispatch: Dispatch) => {
+    try {
+      await monitorService.deleteMonitor(id)
+      dispatch(removeMonitor(id))
+    } catch (error) {
+      let errorMessage = 'Error deleting monitor'
       if (error instanceof Error){
         errorMessage += error.message
       }

@@ -18,4 +18,9 @@ const getMonitors = async () => {
   return response
 }
 
-export default {addMonitor, getMonitors}
+const deleteMonitor = async (id: string) => {
+  const response = await axios.delete(`/api/monitors/${id}`)
+  return response
+}
+
+export default {addMonitor, getMonitors, deleteMonitor}
