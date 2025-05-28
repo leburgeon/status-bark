@@ -13,4 +13,9 @@ const addMonitor = async (data: NewMonitorData) => {
   return response
 }
 
-export default {addMonitor}
+const getMonitors = async () => {
+  const response = await axios.get('/api/monitors')
+  return response
+}
+
+export default {addMonitor, getMonitors}

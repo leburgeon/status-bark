@@ -1,19 +1,23 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Box, Typography, Paper, Button, Stack, Fade } from '@mui/material'
-import { useAppSelector } from "../../../hooks"
+import { useAppDispatch, useAppSelector } from "../../../hooks"
 import Monitor from "./MonitorListItem"
 import AddMonitorDialog from './AddMonitorDialog'
-import { NewMonitorData } from '../../../reducers/monitorsSlice'
+import {  createMonitor, initialiseMonitors, NewMonitorData } from '../../../reducers/monitorsSlice'
 
 const MonitorsList = () => {
   const monitors = useAppSelector(store => store.monitors.monitorsArray)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const dispatch = useAppDispatch()
 
-  // Placeholder for add monitor logic
   const handleAddMonitor = (data: NewMonitorData) => {
-    
+    dispatch(createMonitor(data))
     setDialogOpen(false)
   }
+
+  useEffect(() => {
+    dispatch(initialiseMonitors())
+  }, [dispatch])
 
   return (
     <Box sx={{ maxWidth: 700, mx: 'auto', mt: 6, mb: 4 }}>

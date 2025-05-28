@@ -1,7 +1,7 @@
 import { createSlice, Dispatch, PayloadAction } from "@reduxjs/toolkit"
 import { z } from "zod"
 import monitorService from "../services/monitorService"
-import { handleErrorsMessage, showError } from "./uiSlice"
+import { showError } from "./uiSlice"
 
 export const MonitorSchema = z.object({
   id: z.string(),
@@ -9,7 +9,7 @@ export const MonitorSchema = z.object({
   url: z.string(),
   interval: z.number(),
   lastStatus: z.enum(['UP', 'DOWN', 'NOTCHECKED']),
-  lastChecked: z.string().date(),
+  lastChecked: z.string(),
   createdAt: z.string(),
   discordWebhook: z.object({
     notify: z.boolean(),
@@ -37,7 +37,7 @@ const initialState: {monitorsArray: Monitor[]} = {monitorsArray: [
     createdAt: "2025-05-16T10:54:42.965Z",
     lastChecked: "2025-05-16T10:54:42.965Z",
     discordWebhook: {notify: true, urlPresent: true}
-  },{id: 'fooid',
+  },{id: 'fooddid',
     interval: 5,
     nickname: 'foonick',
     url: 'ooasdfasdfffffffffo.com',
@@ -86,6 +86,7 @@ export const createMonitor = (data: NewMonitorData) => {
       const newMonitor = MonitorSchema.parse(response.data)
       dispatch(addMonitor(newMonitor))
     } catch (error: unknown) {
+      console.error(error)
       let errorMessage = 'Error creating monitor'
       if (error instanceof Error){
         errorMessage += error.message
@@ -99,10 +100,16 @@ export const initialiseMonitors = () => {
   return async (dispatch:Dispatch) => {
     try {
       const response = await monitorService.getMonitors()
+      console.log(response.data)
       const monitorsArray = MonitorSchema.array().parse(response.data)
       dispatch(setMonitors(monitorsArray))
     } catch (error) {
-      dispatch(handleErrorsMessage(error))
+      console.error(error)
+      let errorMessage = 'Error fetching monitors'
+      if (error instanceof Error){
+        errorMessage += error.message
+      }
+      dispatch(showError(errorMessage))
     }
   }
 }
