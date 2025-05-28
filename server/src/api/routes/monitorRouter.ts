@@ -31,14 +31,6 @@ monitorRouter.post('', authenticateAndExtractUser, parseNewMonitor, async (req: 
   }
 
   const {nickname, url, interval} = req.body
-
-  // Ensures that the montior does not exist already in the monitors
-  if (usersMonitors.some(monitor => {
-    return url === monitor.url
-  })) {
-    res.status(400).json({error: 'A monitor for this url already exists'})
-    return
-  }
   
   try {
     // For attempting to create and save the new monitor
@@ -67,7 +59,7 @@ monitorRouter.post('', authenticateAndExtractUser, parseNewMonitor, async (req: 
 
     // Saves the new monitor
     await newMonitor.save()
-    res.status(201).json({data: 'Monitor added successfuly'})
+    res.status(201).json(newMonitor)
   } catch (error) {
     next(error)
   }
