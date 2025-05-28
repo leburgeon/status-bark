@@ -1,5 +1,7 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { z } from "zod";
+import { createSlice, Dispatch, PayloadAction } from "@reduxjs/toolkit"
+import { z } from "zod"
+import monitorService from "../services/monitorService"
+import { handleErrorsMessage, showError } from "./uiSlice"
 
 export const MonitorSchema = z.object({
   id: z.string(),
@@ -16,6 +18,15 @@ export const MonitorSchema = z.object({
 })
 
 export type Monitor = z.infer<typeof MonitorSchema>
+
+export const NewMonitorSchema = z.object({
+  nickname: z.string(),
+  url: z.string(),
+  interval: z.number(),
+  discordWebhook: z.string().optional()
+})
+
+export type NewMonitorData = z.infer<typeof NewMonitorSchema>
 
 const initialState: {monitorsArray: Monitor[]} = {monitorsArray: [
   {id: 'fooid',
@@ -56,6 +67,9 @@ const monitorSlice = createSlice({
         }
       })
     },
+    addMonitor: (state, action: PayloadAction<Monitor>) => {
+      state.monitorsArray.push(action.payload)
+    },
     deleteMonitor: (state, action: PayloadAction<string>) => {
       state.monitorsArray = state.monitorsArray.filter(monitor => monitor.id !== action.payload)
     },
@@ -63,6 +77,34 @@ const monitorSlice = createSlice({
   }
 })
 
-export const {setMonitors, clearMonitors} = monitorSlice.actions
+export const {setMonitors, clearMonitors, addMonitor} = monitorSlice.actions
+
+export const createMonitor = (data: NewMonitorData) => {
+  return async (dispatch: Dispatch) => {
+    try {
+      const response = await monitorService.addMonitor(data)
+      const newMonitor = MonitorSchema.parse(response.data)
+      dispatch(addMonitor(newMonitor))
+    } catch (error: unknown) {
+      let errorMessage = 'Error creating monitor'
+      if (error instanceof Error){
+        errorMessage += error.message
+      }
+      dispatch(showError(errorMessage))
+    }
+  }
+}
+
+export const initialiseMonitors = () => {
+  return async (dispatch:Dispatch) => {
+    try {
+      const response = await monitorService.getMonitors()
+      const monitorsArray = MonitorSchema.array().parse(response.data)
+      dispatch(setMonitors(monitorsArray))
+    } catch (error) {
+      dispatch(handleErrorsMessage(error))
+    }
+  }
+}
 
 export default monitorSlice.reducer
