@@ -1,7 +1,7 @@
 import { createSlice, Dispatch, PayloadAction } from "@reduxjs/toolkit"
 import { z } from "zod"
 import monitorService from "../services/monitorService"
-import { showError } from "./uiSlice"
+import { setFetching, showError } from "./uiSlice"
 
 export const MonitorSchema = z.object({
   id: z.string(),
@@ -77,7 +77,7 @@ const monitorSlice = createSlice({
   }
 })
 
-export const {setMonitors, clearMonitors, addMonitor, removeMonitor} = monitorSlice.actions
+export const {setMonitors, clearMonitors, addMonitor, removeMonitor, updateMonitor} = monitorSlice.actions
 
 export const createMonitor = (data: NewMonitorData) => {
   return async (dispatch: Dispatch) => {
@@ -122,6 +122,25 @@ export const deleteMonitor = (id: string) => {
         errorMessage += error.message
       }
       dispatch(showError(errorMessage))
+    }
+  }
+}
+
+export const sendWebhookPatchAndUpdateMonitor = (id: string, data: {notify: boolean, unEncryptedWebhook?: string | null}) => {
+  return async (dispatch: Dispatch) => {
+    dispatch(setFetching(true))
+    try {
+      const response = await monitorService.patchWebhook(id, data)
+      const updatedMonitor = MonitorSchema.parse(response.data)
+      dispatch(updateMonitor(updatedMonitor))
+    } catch (error) {
+      let errorMessage = 'Error updating notification settings'
+      if (error instanceof Error) {
+        errorMessage += error.message
+      }
+      dispatch(showError(errorMessage))
+    } finally {
+      dispatch(setFetching(false))
     }
   }
 }

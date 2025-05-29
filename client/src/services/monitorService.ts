@@ -23,4 +23,10 @@ const deleteMonitor = async (id: string) => {
   return response
 }
 
-export default {addMonitor, getMonitors, deleteMonitor}
+// Method for sending a webhook patch
+const patchWebhook = async (id: string, data: {notify: boolean, unEncryptedWebhook?: string | null}) => {
+  const response = await axios.patch(`/api/monitors/discordWebhook/${id}`, data)
+  return response
+}
+
+export default {addMonitor, getMonitors, deleteMonitor, patchWebhook}

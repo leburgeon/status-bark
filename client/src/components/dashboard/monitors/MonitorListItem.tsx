@@ -2,10 +2,18 @@ import { ListItem, Tooltip, ListItemButton, ListItemIcon, ListItemText, IconButt
 import StatusIcon from './StatusIcon'
 import { Monitor } from "../../../reducers/monitorsSlice"
 import { DeleteOutlineOutlined } from "@mui/icons-material"
+import NotificationSwitch from "./NotificationSwitch"
+import NotificationIcon from "./NotificationIcon"
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
+import { useState } from "react"
+
 
 // Add onDeleteClick prop to trigger delete dialog from parent
-const MonitorListItem = ({id, nickname, url, interval, lastStatus, lastChecked, onDeleteClick}: Monitor & { onDeleteClick: () => void }) => {
-  // id is used as a key in parent, so it's fine to keep it here for prop typing
+const MonitorListItem = ({ id, nickname, url, interval, lastStatus, lastChecked, discordWebhook, onDeleteClick}: Monitor & { onDeleteClick: () => void }) => {
+  
+  // For storing the state of the notify value for the list item for responsive ui change to the switch
+  const [notifyState, setNotifyState] = useState(discordWebhook.notify)
+
   return (
     <ListItem>
       <ListItemIcon sx={{ minWidth: 36 }}>
@@ -23,14 +31,22 @@ const MonitorListItem = ({id, nickname, url, interval, lastStatus, lastChecked, 
             <Box sx={{ flex: 'none', width: 120, pl: 0, textAlign: 'right' }}>
               <ListItemText
                 primary={<span style={{ display: 'block', whiteSpace: 'nowrap' }}>{`Every: ${interval} Min`}</span>}
-                secondary={<span style={{ display: 'block', whiteSpace: 'nowrap' }}>{`Last: ${new Date(lastChecked).toLocaleTimeString()}`}</span>}
+                secondary={<span style={{ display: 'block', whiteSpace: 'nowrap' }}>{lastStatus === 'NOTCHECKED' ? 'Not Checked' : `Last: ${new Date(lastChecked).toLocaleTimeString()}`}</span>}
               />
             </Box>
           </Box>
         </ListItemButton>
       </Tooltip>
+
+      <NotificationSwitch id={id} discordWebhook={discordWebhook} notifyState={notifyState} setNotifyState={setNotifyState} />
+      <ListItemIcon sx={{ minWidth: 36 }}>
+        <NotificationIcon notify={notifyState}/>
+      </ListItemIcon>
+      <IconButton sx={{ml: '-5px'}}>
+        <EditOutlinedIcon color="secondary"/>
+      </IconButton>
       <IconButton onClick={onDeleteClick}>
-        <DeleteOutlineOutlined/>
+        <DeleteOutlineOutlined color="error"/>
       </IconButton>
     </ListItem>
   )

@@ -1,16 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createSlice, Dispatch, PayloadAction } from "@reduxjs/toolkit"
-
 interface uiState {
   snackbar: {
     message: string,
     severity: 'error' | 'info' | 'success' | 'warning',
     open: boolean
-  }
+  },
+  fetching: boolean
 }
 
 const initialState: uiState = {
-  snackbar: { message: '', severity: 'error', open: false }
+  snackbar: { message: '', severity: 'error', open: false },
+  fetching: false
 }
 
 const uiSlice = createSlice({
@@ -22,11 +23,14 @@ const uiSlice = createSlice({
     },
     hideSnackbar: (state) => {
       state.snackbar.open = false
+    },
+    setFetching: (state, action: PayloadAction<boolean>) => {
+      state.fetching = action.payload
     }
   }
 })
 
-export const { showError, hideSnackbar } = uiSlice.actions
+export const { showError, hideSnackbar, setFetching } = uiSlice.actions
 export default uiSlice.reducer
 
 export const handleErrorsMessage = (error: unknown) => {
