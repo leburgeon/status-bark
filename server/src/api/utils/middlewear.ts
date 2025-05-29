@@ -95,7 +95,7 @@ export const requestLogger = (req: Request, _res: Response, next: NextFunction) 
   const method = req.method
   const body = req.body
   const path = req.originalUrl
-  logger.info(`URL: ${path} Method: ${method} Body: ${body}`)
+  logger.info(`URL: ${path} Method: ${method} Body: ${JSON.stringify(body)}`)
   next()
 }
 
