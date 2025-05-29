@@ -175,7 +175,7 @@ monitorRouter.patch('/discordWebhook/:id', authenticateAndExtractUser, parseAndP
       return
     }
 
-    res.status(200).json('okayeye')
+    res.status(200).json(result)
   } catch (error) {
     next(error)
   }
