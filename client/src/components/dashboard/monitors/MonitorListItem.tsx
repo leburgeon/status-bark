@@ -9,7 +9,7 @@ import { useState } from "react"
 
 
 // Add onDeleteClick prop to trigger delete dialog from parent
-const MonitorListItem = ({ id, nickname, url, interval, lastStatus, lastChecked, discordWebhook, onDeleteClick}: Monitor & { onDeleteClick: () => void }) => {
+const MonitorListItem = ({ id, nickname, url, interval, lastStatus, lastChecked, discordWebhook, onDeleteClick, onEditClick, fetching}: Monitor & { onEditClick: () => void, onDeleteClick: () => void, fetching: boolean }) => {
   
   // For storing the state of the notify value for the list item for responsive ui change to the switch
   const [notifyState, setNotifyState] = useState(discordWebhook.notify)
@@ -38,11 +38,11 @@ const MonitorListItem = ({ id, nickname, url, interval, lastStatus, lastChecked,
         </ListItemButton>
       </Tooltip>
 
-      <NotificationSwitch id={id} discordWebhook={discordWebhook} notifyState={notifyState} setNotifyState={setNotifyState} />
+      <NotificationSwitch fetching={fetching} id={id} discordWebhook={discordWebhook} notifyState={notifyState} setNotifyState={setNotifyState} />
       <ListItemIcon sx={{ minWidth: 36 }}>
         <NotificationIcon notify={notifyState}/>
       </ListItemIcon>
-      <IconButton sx={{ml: '-5px'}}>
+      <IconButton onClick={onEditClick} sx={{ml: '-5px'}}>
         <EditOutlinedIcon color="secondary"/>
       </IconButton>
       <IconButton onClick={onDeleteClick}>

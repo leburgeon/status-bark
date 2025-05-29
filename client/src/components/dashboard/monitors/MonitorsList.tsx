@@ -5,30 +5,52 @@ import Monitor from "./MonitorListItem"
 import AddMonitorDialog from './AddMonitorDialog'
 import DeleteMonitorDialog from './DeleteMonitorDialog'
 import { createMonitor, initialiseMonitors, deleteMonitor, NewMonitorData, Monitor as MonitorType } from '../../../reducers/monitorsSlice'
+import EditMonitorDialog from './EditMonitorDialog'
 
 const MonitorsList = () => {
   const monitors = useAppSelector(store => store.monitors.monitorsArray)
-  const [dialogOpen, setDialogOpen] = useState(false)
+
+  const [newDialogOpen, setNewDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+
   const [selectedMonitor, setSelectedMonitor] = useState<MonitorType | null>(null)
   const dispatch = useAppDispatch()
 
+  // Variable for disabling some buttons when the browser is fetching
+  const fetching = useAppSelector(store => store.ui.fetching)
+
+  // For handling adding a new monitor
   const handleAddMonitor = (data: NewMonitorData) => {
     dispatch(createMonitor(data))
-    setDialogOpen(false)
+    setNewDialogOpen(false)
   }
 
+  // Handles what happens when the delete icon is clicked, including opening the dialoge
   const handleDeleteClick = (monitor: MonitorType) => {
     setSelectedMonitor(monitor)
     setDeleteDialogOpen(true)
   }
 
+  // Handles what happens when the deletion is complete
   const handleDeleteConfirm = () => {
     if (selectedMonitor) {
       dispatch(deleteMonitor(selectedMonitor.id))
     }
     setDeleteDialogOpen(false)
     setSelectedMonitor(null)
+  }
+
+  // Handles what happens when the edit button is pressed
+  const handleEditClick = (monitor: MonitorType) => {
+    setSelectedMonitor(monitor)
+    setEditDialogOpen(true)
+  }
+
+  // Handles the submition of the edit for the monitor
+  const handleSubmitEdit = (data: {url: string, interval: number, nickname: string}, id: string) => {
+    //todo
+    console.log('submit edit!', data, id)
   }
 
   useEffect(() => {
@@ -49,6 +71,8 @@ const MonitorsList = () => {
               <Monitor 
                 {...monitor}
                 onDeleteClick={() => handleDeleteClick(monitor)}
+                onEditClick={() => handleEditClick(monitor)}
+                fetching={fetching}
               />
             </Box></Fade>)
           )}
@@ -59,18 +83,28 @@ const MonitorsList = () => {
             color="primary"
             size="large"
             sx={{ minWidth: 200, fontSize: '1.1rem', boxShadow: '0 0 16px #ff2ec4' }}
-            onClick={() => setDialogOpen(true)}
+            onClick={() => setNewDialogOpen(true)}
           >
             + Add Monitor
           </Button>
         </Box>
       </Paper>
-      <AddMonitorDialog open={dialogOpen} onClose={() => setDialogOpen(false)} onAdd={handleAddMonitor} />
+      <AddMonitorDialog 
+        open={newDialogOpen} 
+        onClose={() => setNewDialogOpen(false)} 
+        onAdd={handleAddMonitor} 
+      />
       <DeleteMonitorDialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
         onConfirm={handleDeleteConfirm}
-        monitorNickname={selectedMonitor?.nickname || ''}
+        monitorNickname={selectedMonitor?.nickname || 'this monitor'}
+      />
+      <EditMonitorDialog
+        open={editDialogOpen}
+        onClose={() => setEditDialogOpen(false)}
+        onSubmit={handleSubmitEdit}
+        selectedMonitor={selectedMonitor}  
       />
     </Box>
   )

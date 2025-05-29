@@ -1,12 +1,11 @@
 import { Switch, Tooltip } from "@mui/material"
-import { useAppDispatch, useAppSelector } from "../../../hooks"
+import { useAppDispatch } from "../../../hooks"
 import { ChangeEvent } from "react"
 import { sendWebhookPatchAndUpdateMonitor } from "../../../reducers/monitorsSlice"
 
-const NotificationSwitch = ({discordWebhook, id, notifyState, setNotifyState}: {id: string, discordWebhook: {notify: boolean, urlPresent: boolean}, notifyState: boolean, setNotifyState: React.Dispatch<React.SetStateAction<boolean>>}) => {
+const NotificationSwitch = ({discordWebhook, id, notifyState, setNotifyState, fetching}: {id: string, discordWebhook: {notify: boolean, urlPresent: boolean}, fetching: boolean, notifyState: boolean, setNotifyState: React.Dispatch<React.SetStateAction<boolean>>}) => {
   
   const dispatch = useAppDispatch()
-  const fetching = useAppSelector(store => store.ui.fetching)
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setNotifyState(!notifyState)
