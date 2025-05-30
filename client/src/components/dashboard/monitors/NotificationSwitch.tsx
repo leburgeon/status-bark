@@ -13,7 +13,7 @@ const NotificationSwitch = ({discordWebhook, id, notifyState, setNotifyState, fe
   }
 
   return (
-  <Tooltip title={discordWebhook.urlPresent ? '' : 'cant notify without a webhook'}>
+  <Tooltip title={discordWebhook.urlPresent ? '' : 'add a discord webhook in the settings'}>
     <span>
       <Switch 
         checked={notifyState}

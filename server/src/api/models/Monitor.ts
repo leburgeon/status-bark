@@ -28,7 +28,7 @@ const monitorSchema = new Schema({
     type: String,
     required: true,
     minLength: 3,
-    maxLength: 15
+    maxLength: 25
   },
   url: {
     type: String,

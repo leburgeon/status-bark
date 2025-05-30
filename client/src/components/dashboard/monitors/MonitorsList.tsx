@@ -4,8 +4,9 @@ import { useAppDispatch, useAppSelector } from "../../../hooks"
 import Monitor from "./MonitorListItem"
 import AddMonitorDialog from './AddMonitorDialog'
 import DeleteMonitorDialog from './DeleteMonitorDialog'
-import { createMonitor, initialiseMonitors, deleteMonitor, NewMonitorData, Monitor as MonitorType } from '../../../reducers/monitorsSlice'
+import { createMonitor, initialiseMonitors, deleteMonitor, NewMonitorData, Monitor as MonitorType, sendMonitorPatchAndUpdateMonitor } from '../../../reducers/monitorsSlice'
 import EditMonitorDialog from './EditMonitorDialog'
+import UpdateWebhookDialog from './UpdateWebhookDialog'
 
 const MonitorsList = () => {
   const monitors = useAppSelector(store => store.monitors.monitorsArray)
@@ -49,8 +50,9 @@ const MonitorsList = () => {
 
   // Handles the submition of the edit for the monitor
   const handleSubmitEdit = (data: {url: string, interval: number, nickname: string}, id: string) => {
-    //todo
-    console.log('submit edit!', data, id)
+    dispatch(sendMonitorPatchAndUpdateMonitor(id, data))
+    setEditDialogOpen(false)
+    setSelectedMonitor(null)
   }
 
   useEffect(() => {
@@ -58,7 +60,9 @@ const MonitorsList = () => {
   }, [dispatch])
 
   return (
+
     <Box sx={{ maxWidth: 700, mx: 'auto', mt: 6, mb: 4 }}>
+
       <Paper elevation={4} sx={{ p: 4, borderRadius: 3, background: 'linear-gradient(145deg, #141414, #1e1e1e)' }}>
         <Typography variant="h2" sx={{ mb: 3, textAlign: 'center', letterSpacing: 2, color: 'primary.main', fontWeight: 700 }}>
           MONITORS
@@ -89,23 +93,28 @@ const MonitorsList = () => {
           </Button>
         </Box>
       </Paper>
+
       <AddMonitorDialog 
         open={newDialogOpen} 
         onClose={() => setNewDialogOpen(false)} 
         onAdd={handleAddMonitor} 
       />
+
       <DeleteMonitorDialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
         onConfirm={handleDeleteConfirm}
         monitorNickname={selectedMonitor?.nickname || 'this monitor'}
       />
+
       <EditMonitorDialog
         open={editDialogOpen}
         onClose={() => setEditDialogOpen(false)}
         onSubmit={handleSubmitEdit}
         selectedMonitor={selectedMonitor}  
       />
+
+      <UpdateWebhookDialog/>
     </Box>
   )
 }

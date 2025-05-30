@@ -75,14 +75,14 @@ export const DiscordWebhookPatchDataSchema = z.object({
 
 // Zod schema for parsing monitor patch data
 export const MonitorPatchDataSchema = z.object({
-  nickname: z.string().min(3),
+  nickname: z.string().min(3).max(25),
   url: z.string().url(),
   interval: z.enum(['5', '15', '30']).transform(val => parseInt(val))
 }).partial()
 
 
 export const ProcessedMonitorUpdateSchema = z.object({
-  nickname: z.string().min(3),
+  nickname: z.string().min(3).max(25),
   url: z.string().url(),
   interval: z.enum(['5', '15', '30']).transform(val => parseInt(val)),
   discordWebhook: EncryptedDiscordWebhookObjectSchema.partial()

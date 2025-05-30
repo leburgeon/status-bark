@@ -43,7 +43,7 @@ const MonitorListItem = ({ id, nickname, url, interval, lastStatus, lastChecked,
         <NotificationIcon notify={notifyState}/>
       </ListItemIcon>
       <IconButton onClick={onEditClick} sx={{ml: '-5px'}}>
-        <EditOutlinedIcon color="secondary"/>
+        <EditOutlinedIcon />
       </IconButton>
       <IconButton onClick={onDeleteClick}>
         <DeleteOutlineOutlined color="error"/>

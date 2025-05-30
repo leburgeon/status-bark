@@ -127,4 +127,23 @@ export const sendWebhookPatchAndUpdateMonitor = (id: string, data: {notify: bool
   }
 }
 
+export const sendMonitorPatchAndUpdateMonitor = (id: string, data: {nickname: string, url: string, interval: number}) => {
+  return async (dispatch: Dispatch) => {
+    dispatch(setFetching(true))
+    try {
+      const response = await monitorService.patchMonitor(id, data)
+      const updatedMonitor = MonitorSchema.parse(response.data)
+      dispatch(updateMonitor(updatedMonitor))
+    } catch (error){
+      let errorMessage = 'Error updating monitor info'
+      if (error instanceof Error){
+        errorMessage += error.message
+      }
+      dispatch(showError(errorMessage))
+    } finally {
+      dispatch(setFetching(false))
+    }
+  }
+}
+
 export default monitorSlice.reducer

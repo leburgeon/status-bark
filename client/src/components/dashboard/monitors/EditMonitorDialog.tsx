@@ -9,22 +9,24 @@ interface EditMonitorDialogProps {
   open: boolean,
   onClose: () => void,
   onSubmit: (data: {url: string, interval: number, nickname: string}, id: string) => void,
-  selectedMonitor: Monitor
+  selectedMonitor: Monitor | null
 }
 
 const EditMonitorDialog = ({ open, onClose, onSubmit, selectedMonitor }: EditMonitorDialogProps) => {
-  const [nickname, setNickname] = useState(selectedMonitor.nickname)
-  const [url, setUrl] = useState(selectedMonitor.url)
-  const [interval, setInterval] = useState(selectedMonitor.interval)
+  const [nickname, setNickname] = useState('')
+  const [url, setUrl] = useState('')
+  const [interval, setInterval] = useState(0)
   const [nicknameError, setNicknameError] = useState('')
   const [urlError, setUrlError] = useState('')
 
   useEffect(() => {
-    setNickname(selectedMonitor.nickname)
-    setUrl(selectedMonitor.url)
-    setInterval(selectedMonitor.interval)
-    setNicknameError('')
-    setUrlError('')
+    if (open && selectedMonitor){
+      setNickname(selectedMonitor.nickname)
+      setUrl(selectedMonitor.url)
+      setInterval(selectedMonitor.interval)
+      setNicknameError('')
+      setUrlError('')
+    }
   }, [selectedMonitor, open])
 
   const validateNickname = (value: string) => {
@@ -66,23 +68,15 @@ const EditMonitorDialog = ({ open, onClose, onSubmit, selectedMonitor }: EditMon
     setNicknameError(nicknameErr)
     setUrlError(urlErr)
     if (nicknameErr || urlErr) return
-    onSubmit({ nickname, url, interval }, selectedMonitor.id)
+    onSubmit({ nickname, url, interval }, selectedMonitor?.id || 'badid')
     onClose()
   }
 
-  const handleClose = () => {
-    onClose()
-    setNickname(selectedMonitor.nickname)
-    setUrl(selectedMonitor.url)
-    setInterval(selectedMonitor.interval)
-    setNicknameError('')
-    setUrlError('')
-  }
 
   return (
     <Dialog
       open={open}
-      onClose={handleClose}
+      onClose={onClose}
       slotProps={{ paper: { sx: { borderRadius: 3, background: 'linear-gradient(145deg, #141414, #1e1e1e)' } } }}
     >
       <DialogTitle sx={{ fontWeight: 700, fontSize: '1.5rem', color: 'primary.main', letterSpacing: 2 }}>Edit Monitor</DialogTitle>
@@ -119,9 +113,9 @@ const EditMonitorDialog = ({ open, onClose, onSubmit, selectedMonitor }: EditMon
             />
           </Stack>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="secondary" variant="outlined" sx={{ borderRadius: 2 }}>Cancel</Button>
-          <Button type="submit" color="primary" variant="contained" sx={{ borderRadius: 2, fontWeight: 600, minWidth: 100 }}>Save</Button>
+        <DialogActions sx={{ justifyContent: 'center' }}>
+          <Button onClick={onClose} color="secondary" variant="outlined" sx={{ borderRadius: 2 }}>Cancel</Button>
+          <Button disabled={selectedMonitor === null || (nickname === selectedMonitor.nickname && url === selectedMonitor.url && interval === selectedMonitor.interval) } type="submit" color="primary" variant="contained" sx={{ borderRadius: 2, fontWeight: 600, minWidth: 100 }}>Save</Button>
         </DialogActions>
       </form>
     </Dialog>

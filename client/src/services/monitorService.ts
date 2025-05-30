@@ -29,4 +29,10 @@ const patchWebhook = async (id: string, data: {notify: boolean, unEncryptedWebho
   return response
 }
 
-export default {addMonitor, getMonitors, deleteMonitor, patchWebhook}
+// Methof for patching the details of a monitor
+const patchMonitor = async (id: string, data: {nickname: string, url: string, interval: number}) => {
+  const response = await axios.patch(`/api/monitors/${id}`,{...data, interval: data.interval.toString()})
+  return response
+}
+
+export default {addMonitor, getMonitors, deleteMonitor, patchWebhook, patchMonitor}
