@@ -11,7 +11,7 @@ const GlobalSnackbar = () => {
     <Snackbar
       open={snackbar.open}
       autoHideDuration={6000}
-      onClose={() => dispatch(hideSnackbar({}))}
+      onClose={() => dispatch(hideSnackbar())}
     >
       <Alert severity={snackbar.severity} onClose={() => dispatch(hideSnackbar())}>
         {snackbar.message}
