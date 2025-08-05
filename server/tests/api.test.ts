@@ -9,6 +9,7 @@ import config from '../src/utils/config.js'
 
 const api = supertest(app)
 
+
 try {
   await mongoose.connect(config.MONGODB_URL)
 } catch (error) {
@@ -333,7 +334,7 @@ describe('When there are initially some users in the database', () => {
 
         await api.delete(`/api/monitors/${monitorToDelete._id.toString()}`)
           .auth(token, { type: 'bearer' })
-          .expect(410)
+          .expect(204)
 
         const monitorsAfter = await helper.monitorsInDb()
         assert.strictEqual(monitorsAfter.length, monitorsBefore.length - 1)

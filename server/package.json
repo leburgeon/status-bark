@@ -7,8 +7,8 @@
   "type": "module",
   "main": "./build/index.js",
   "scripts": {
-    "test": "npm run build && cross-env NODE_ENV=test node --test",
-    "test:only": "npm run build && cross-env NODE_ENV=test node --test --test-only",
+    "test": "npm run build && cross-env NODE_ENV=test node --test ./build/tests/*",
+    "test:only": "npm run build && cross-env NODE_ENV=test node --test --test-only ./build/tests/*",
     "tsc": "tsc",
     "dev:api": "tsx watch src/api/index.ts",
     "dev:cron": "tsx watch src/cron/index.ts",
