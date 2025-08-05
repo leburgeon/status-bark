@@ -11,7 +11,6 @@ const api = supertest(app)
 
 try {
   await mongoose.connect(config.MONGODB_URL)
-  console.log(config.MONGODB_URL)
 } catch (error) {
   console.error('Error connecting to database', error)
 }
