@@ -254,9 +254,45 @@ describe('When there are initially some users in the database', () => {
           assert.notStrictEqual(postNotify, preNotify)
         })
 
-        // test('attempting to remove a discord webhook', async () => {
-        //   const monitorToUpdate = await helper.
-        // })
+        test.only('attempting to remove a discord webhook', async () => {
+          const monitorToUpdate = await helper.getSpecificFirstUserMonitor()
+
+          // Asserts that the monitor has a webhook to begin with, and that notify is on
+          assert(monitorToUpdate.discordWebhook.encryptedUrl)
+          assert(monitorToUpdate.discordWebhook.notify)
+
+          await api.patch(`/api/monitors/discordWebhook/${monitorToUpdate._id.toString()}`)
+            .send({ unEncryptedWebhook: null })
+            .auth(await helper.getBearerTokenOfFirstUser(60 * 60), { type: 'bearer' })
+            .expect(200)
+
+          const updatedMonitor = await helper.getMonitorById(monitorToUpdate._id.toString())
+
+          // Asserts that the webhook url was removed
+          assert(!updatedMonitor.discordWebhook.encryptedUrl)
+
+          // Asserts that the webhook notify was switched off 
+          assert(!updatedMonitor.discordWebhook.notify)
+        })
+
+        test.only('attempting to add a discord webhook to a monitor without it', async () => {
+          // Adds a monitor without a webhook url
+          const { nickname, url, interval } = helper.monitorToAdd
+          const monitorId = await helper.addMonitorWithDataAsFirstUserAndReturnId({ nickname, url, interval: parseInt(interval) })
+
+          // Adds the discord webhook
+          await api.patch(`/api/monitors/discordWebhook/${monitorId}`)
+            .send({ unEncryptedWebhook: helper.testWebhook })
+            .auth(await helper.getBearerTokenOfFirstUser(3600), { type: 'bearer' })
+            .expect(200)
+
+          const updatedMonitor = await helper.getMonitorById(monitorId)
+
+          // Asserts that the webhook was successfully added
+          assert(updatedMonitor.discordWebhook.encryptedUrl)
+          assert(!updatedMonitor.discordWebhook.notify)
+        })
+
       })
 
       describe('fails when...', () => {
@@ -322,6 +358,8 @@ describe('When there are initially some users in the database', () => {
 
           assert.strictEqual(postNotify, preNotify)
         })
+
+        // TODO: attempting to turn on notifications while adding the discord webhook
       })
     })
 
