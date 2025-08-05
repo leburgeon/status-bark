@@ -46,11 +46,13 @@ export const parseAndProcessDiscordWebhookPatchData = (req: Request, _res: Respo
   try {
     DiscordWebhookPatchDataSchema.parse(req.body)
     // Processes the discord webhook url update if present
-    if (Object.keys(req.body).includes('unEncryptedWebhook')){
-      if (req.body.unEncryptedWebhook){
+    if (Object.keys(req.body).includes('unEncryptedWebhook')) {
+      if (req.body.unEncryptedWebhook) {
         req.body.encryptedUrl = encryptSymmetricIntoPayload(req.body.unEncryptedWebhook)
       } else {
+        // If the unEncryptedWebhook value is present but its value is falsy, the notify value of the webhook is set to false to ensure notify cannot be on without a webhook
         req.body.encryptedUrl = null
+        req.body.notify = false
       }
     }
     next()
@@ -63,8 +65,8 @@ export const parseAndProcessDiscordWebhookPatchData = (req: Request, _res: Respo
 export const authenticateAndExtractUser = async (req: Request, res: Response, next: NextFunction) => {
   const authorisation = req.get('Authorization')
   // If the token does not exist or uses the wrong schema, returns error response
-  if (!authorisation || !authorisation.startsWith('Bearer')){
-    res.status(401).json({error: 'Please authenticate with bearer scheme'})
+  if (!authorisation || !authorisation.startsWith('Bearer')) {
+    res.status(401).json({ error: 'Please authenticate with bearer scheme' })
     return
   } else {
     try {
@@ -77,8 +79,8 @@ export const authenticateAndExtractUser = async (req: Request, res: Response, ne
 
       // Attempts to find the authenticated user
       const user = await User.findById(payload.id)
-      if (!user){
-        res.status(401).json({error: 'Invalid token, please re-login'})
+      if (!user) {
+        res.status(401).json({ error: 'Invalid token, please re-login' })
         return
       }
       // Adds the use document to the request body
@@ -101,15 +103,15 @@ export const requestLogger = (req: Request, _res: Response, next: NextFunction) 
 
 export const errorHandler = (error: unknown, _req: Request, res: Response, _next: NextFunction) => {
   logger.error(error)
-  if (error instanceof ZodError){
+  if (error instanceof ZodError) {
     res.status(400).json(error)
-  } else if (error instanceof MongooseError){
+  } else if (error instanceof MongooseError) {
     res.status(500).json(error)
   } else if (error instanceof jwt.JsonWebTokenError) {
-    res.status(400).json({error: error})
+    res.status(400).json({ error: error })
   } else {
     logger.error('UNHANDLED ERROR IN EXPRESS', error)
     console.error(error)
-    res.status(500).json({error: 'Internal Server Error'})
+    res.status(500).json({ error: 'Internal Server Error' })
   }
 }

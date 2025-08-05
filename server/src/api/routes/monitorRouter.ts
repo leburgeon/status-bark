@@ -88,7 +88,7 @@ monitorRouter.delete('/:id', authenticateAndExtractUser, async (req: Request, re
     return
   }
 
-  // Attempts to delete the 
+  // Attempts to delete the monitor
   try {
     await Monitor.findByIdAndDelete(monitorToDelete._id.toString())
     res.status(204).json({ data: 'Successfuly deleted' })
@@ -144,6 +144,7 @@ monitorRouter.patch('/:id', authenticateAndExtractUser, parsePartialMontiorPatch
 
 // Route for updating the discord webhook object
 // Should return an error if trying to turn on notifications for a monitor without a webhook url present
+// Turns off the notifications if deleting a webhook
 monitorRouter.patch('/discordWebhook/:id', authenticateAndExtractUser, parseAndProcessDiscordWebhookPatchData, async (req: Request<{ id: string }, unknown, ProcessedDiscordWebhookPatchData>, res: Response, next: NextFunction) => {
   // Ensures that the id in the request parameters is a valid object id
   const { id } = req.params
