@@ -1,4 +1,4 @@
-import {test, after, beforeEach, describe} from 'node:test'
+import { test, after, beforeEach, describe } from 'node:test'
 import assert from 'node:assert'
 import app from '../src/api/app.js'
 import supertest from 'supertest'
@@ -11,7 +11,8 @@ const api = supertest(app)
 
 try {
   await mongoose.connect(config.MONGODB_URL)
-} catch (error){
+  console.log(config.MONGODB_URL)
+} catch (error) {
   console.error('Error connecting to database', error)
 }
 
@@ -36,7 +37,7 @@ describe('When there are initially some users in the database', () => {
       await api.post('/api/users/register')
         .send(helper.userToAdd)
         .expect(201)
-      
+
       // Asserts that the user count has increased
       const usersInDb = await helper.usersInDb()
       assert.strictEqual(usersInDb.length, helper.initialUsers.length + 1)
@@ -48,7 +49,7 @@ describe('When there are initially some users in the database', () => {
         await api.post('/api/users/register')
           .send(helper.initialUsers[0])
           .expect(400)
-        
+
         // Asserts that the user count has not increased
         const usersInDb = await helper.usersInDb()
         assert.strictEqual(usersInDb.length, helper.initialUsers.length)
@@ -58,7 +59,7 @@ describe('When there are initially some users in the database', () => {
     test('a weak password', async () => {
       // Attempts to register a user with a weak password
       await api.post('/api/users/register')
-        .send({...helper.userToAdd, password: 'weakshit'})
+        .send({ ...helper.userToAdd, password: 'weakshit' })
         .expect(400)
 
       // Ensures no user was created
@@ -74,12 +75,12 @@ describe('When there are initially some users in the database', () => {
       const result = await api.post('/api/users/login')
         .send(helper.initialUsers[0])
         .expect(200)
-      
+
       // Ensures that the returned token is valid
       try {
         jwt.verify(result.body.token, config.JWT_SECRET)
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (_error){
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (_error) {
         assert(false)
       }
     })
@@ -87,13 +88,13 @@ describe('When there are initially some users in the database', () => {
     describe('fails with', () => {
       test('incorrect email', async () => {
         await api.post('/api/users/login')
-          .send({email: 'notexist@email.com', password: 'will never know'})
+          .send({ email: 'notexist@email.com', password: 'will never know' })
           .expect(401)
       })
 
       test('incorrect password', async () => {
         await api.post('/api/users/login')
-          .send({...helper.initialUsers[0], password: 'wrongpassword'})
+          .send({ ...helper.initialUsers[0], password: 'wrongpassword' })
           .expect(401)
       })
     })
@@ -112,11 +113,11 @@ describe('When there are initially some users in the database', () => {
 
         await api.post('/api/monitors')
           .send(helper.monitorToAdd)
-          .auth(await helper.getBearerTokenOfFirstUser(60*60), {type: 'bearer'})
+          .auth(await helper.getBearerTokenOfFirstUser(60 * 60), { type: 'bearer' })
           .expect(201)
-        
-          const monitorsAfter = await helper.monitorsInDb()
-        
+
+        const monitorsAfter = await helper.monitorsInDb()
+
         assert.strictEqual(monitorsAfter.length, monitorsBefore.length + 1)
       })
 
@@ -124,85 +125,85 @@ describe('When there are initially some users in the database', () => {
         test('invalid url', async () => {
           const monitorsBefore = await helper.monitorsInDb()
 
-          const token = await helper.getBearerTokenOfFirstUser(60*60)
-    
+          const token = await helper.getBearerTokenOfFirstUser(60 * 60)
+
           await api.post('/api/monitors')
-            .send({...helper.monitorToAdd, url: 'invalid'})
-            .auth(token, {type: 'bearer'})
+            .send({ ...helper.monitorToAdd, url: 'invalid' })
+            .auth(token, { type: 'bearer' })
             .expect(400)
-          
+
           const monitorsAfter = await helper.monitorsInDb()
-          
+
           assert.strictEqual(monitorsAfter.length, monitorsBefore.length)
         })
 
         test('invalid or expired token', async () => {
           const monitorsBefore = await helper.monitorsInDb()
 
-          const expiredToken =  await helper.getBearerTokenOfFirstUser(0)
+          const expiredToken = await helper.getBearerTokenOfFirstUser(0)
 
           await api.post('/api/monitors')
             .send(helper.monitorToAdd)
-            .auth(expiredToken, {type: 'bearer'})
+            .auth(expiredToken, { type: 'bearer' })
             .expect(400)
 
           const monitorsAfter = await helper.monitorsInDb()
-        
+
           assert.strictEqual(monitorsAfter.length, monitorsBefore.length)
         })
 
         test('duplicate url data', async () => {
           const monitorsBefore = await helper.monitorsInDb()
 
-          const token = await helper.getBearerTokenOfFirstUser(60*60)
-    
+          const token = await helper.getBearerTokenOfFirstUser(60 * 60)
+
           await api.post('/api/monitors')
             .send(helper.initialMonitors[0])
-            .auth(token, {type: 'bearer'})
+            .auth(token, { type: 'bearer' })
             .expect(400)
-          
+
           const monitorsAfter = await helper.monitorsInDb()
-          
+
           assert.strictEqual(monitorsAfter.length, monitorsBefore.length)
         })
 
         test('an invalid url as the unencrypted discord webhook', async () => {
           const monitorsBefore = await helper.monitorsInDb()
 
-          const token = await helper.getBearerTokenOfFirstUser(60*60)
+          const token = await helper.getBearerTokenOfFirstUser(60 * 60)
 
           const discordWebhook = {
             unEncryptedWebhook: 'invalid',
             notify: true
           }
-    
+
           await api.post('/api/monitors')
-            .send({...helper.monitorToAdd, discordWebhook })
-            .auth(token, {type: 'bearer'})
+            .send({ ...helper.monitorToAdd, discordWebhook })
+            .auth(token, { type: 'bearer' })
             .expect(400)
-          
+
           const monitorsAfter = await helper.monitorsInDb()
-          
+
           assert.strictEqual(monitorsAfter.length, monitorsBefore.length)
         })
 
         test('an undefined webhook url if notify is true', async () => {
           const monitorsBefore = await helper.monitorsInDb()
 
-          const token = await helper.getBearerTokenOfFirstUser(60*60)
+          const token = await helper.getBearerTokenOfFirstUser(60 * 60)
 
           // The breaking webhook data
           const discordWebhook = {
             notify: true
           }
-    
+
           await api.post('/api/monitors')
-            .send({...helper.monitorToAdd, discordWebhook })
-            .auth(token, {type: 'bearer'})
+            .send({ ...helper.monitorToAdd, discordWebhook })
+            .auth(token, { type: 'bearer' })
             .expect(400)
-          
+
           const monitorsAfter = await helper.monitorsInDb()
-          
+
           assert.strictEqual(monitorsAfter.length, monitorsBefore.length)
         })
       })
@@ -212,42 +213,42 @@ describe('When there are initially some users in the database', () => {
 
       describe('succeeds when...', () => {
 
-        test.only('all update data is valid', async () => {
+        test('all update data is valid', async () => {
 
           const monitorToUpdate = await helper.getSpecificFirstUserMonitor()
 
           // Copies the values to check them post update
-          const {url: preUrl, nickname: preNickname, interval: preInterval, _id: preId} = monitorToUpdate
+          const { url: preUrl, nickname: preNickname, interval: preInterval, _id: preId } = monitorToUpdate
 
           // Sends the patch request
           await api.patch(`/api/monitors/${preId.toString()}`)
             .send(helper.monitorUpdateData)
-            .auth(await helper.getBearerTokenOfFirstUser(60*60), {type: 'bearer'})
+            .auth(await helper.getBearerTokenOfFirstUser(60 * 60), { type: 'bearer' })
             .expect(200)
-          
+
           // Retrieves the post-update values
-          const {url: postUrl, nickname: postNickname, interval: postInterval} = await helper.getMonitorById(preId.toString())
+          const { url: postUrl, nickname: postNickname, interval: postInterval } = await helper.getMonitorById(preId.toString())
 
           // Asserts that the interval has changed
           assert.notStrictEqual(preInterval, postInterval)
 
           // Asserts that the url has changed
           assert.notStrictEqual(postUrl, preUrl)
-    
+
           // Asserts that the nickname has changed
           assert.notStrictEqual(postNickname, preNickname)
         })
 
-        test('attempting to turn off notifications for a webhook', async () =>{
+        test('attempting to turn off notifications for a webhook', async () => {
           const monitorToUpdate = await helper.getSpecificFirstUserMonitor()
-          const {discordWebhook: {notify: preNotify}} = monitorToUpdate
+          const { discordWebhook: { notify: preNotify } } = monitorToUpdate
           await api.patch(`/api/monitors/discordWebhook/${monitorToUpdate._id.toString()}`)
-            .send({notify: false})
-            .auth(await helper.getBearerTokenOfFirstUser(60*60), {type: 'bearer'})
+            .send({ notify: false })
+            .auth(await helper.getBearerTokenOfFirstUser(60 * 60), { type: 'bearer' })
             .expect(200)
 
           // Retrieves the monitor after the patch
-          const {discordWebhook: {notify: postNotify}} = await helper.getMonitorById(monitorToUpdate._id.toString())
+          const { discordWebhook: { notify: postNotify } } = await helper.getMonitorById(monitorToUpdate._id.toString())
 
           // Asserts that the notify values are different
           assert.notStrictEqual(postNotify, preNotify)
@@ -260,65 +261,65 @@ describe('When there are initially some users in the database', () => {
 
       describe('fails when...', () => {
         test('attempting to update another users monitor', async () => {
-          const firstUserToken = await helper.getBearerTokenOfFirstUser(60*60)
-          const {interval: preInterval, _id: preId} = await helper.getSpecificSecondUserMonitor()
-  
+          const firstUserToken = await helper.getBearerTokenOfFirstUser(60 * 60)
+          const { interval: preInterval, _id: preId } = await helper.getSpecificSecondUserMonitor()
+
           await api.patch(`/api/monitors/${preId.toString()}`)
-            .send({interval: '30'})
-            .auth(firstUserToken, {type: 'bearer'})
+            .send({ interval: '30' })
+            .auth(firstUserToken, { type: 'bearer' })
             .expect(401)
-  
-          const {interval: postInterval, _id: postId} = await helper.getSpecificSecondUserMonitor()
-  
+
+          const { interval: postInterval, _id: postId } = await helper.getSpecificSecondUserMonitor()
+
           assert.strictEqual(postId.toString(), preId.toString())
           assert.strictEqual(postInterval, preInterval)
         })
-  
+
         test('using an invalid token', async () => {
           const firstUserToken = await helper.getBearerTokenOfFirstUser(0)
-          const {interval: preInterval, _id: preId} = await helper.getSpecificFirstUserMonitor()
-  
+          const { interval: preInterval, _id: preId } = await helper.getSpecificFirstUserMonitor()
+
           await api.patch(`/api/monitors/${preId.toString()}`)
             .send(helper.monitorUpdateData)
-            .auth(firstUserToken, {type: 'bearer'})
+            .auth(firstUserToken, { type: 'bearer' })
             .expect(400)
-  
-          const {interval: postInterval, _id: postId} = await helper.getSpecificFirstUserMonitor()
-  
+
+          const { interval: postInterval, _id: postId } = await helper.getSpecificFirstUserMonitor()
+
           assert.strictEqual(postId.toString(), preId.toString())
           assert.strictEqual(postInterval, preInterval)
         })
 
         test('attempting to update with invalid interval data', async () => {
-          const firstUserToken = await helper.getBearerTokenOfFirstUser(60*60)
-          const {interval: preInterval, _id: preId} = await helper.getSpecificFirstUserMonitor()
-  
+          const firstUserToken = await helper.getBearerTokenOfFirstUser(60 * 60)
+          const { interval: preInterval, _id: preId } = await helper.getSpecificFirstUserMonitor()
+
           await api.patch(`/api/monitors/${preId.toString()}`)
-            .send({interval: 'invalid'})
-            .auth(firstUserToken, {type: 'bearer'})
+            .send({ interval: 'invalid' })
+            .auth(firstUserToken, { type: 'bearer' })
             .expect(400)
-  
-          const {interval: postInterval, _id: postId} = await helper.getSpecificFirstUserMonitor()
-  
+
+          const { interval: postInterval, _id: postId } = await helper.getSpecificFirstUserMonitor()
+
           assert.strictEqual(postId.toString(), preId.toString())
           assert.strictEqual(postInterval, preInterval)
         })
 
         test('attempting to turn on a the notification for a monitor with an undefined url', async () => {
           // First adds the monitor without a discord webhook
-          const firstUserToken = await helper.getBearerTokenOfFirstUser(60*60)
-          const {nickname, url, interval } = helper.monitorToAdd
-          const monitorId = await helper.addMonitorWithDataAsFirstUserAndReturnId({nickname, url, interval: parseInt(interval)})
+          const firstUserToken = await helper.getBearerTokenOfFirstUser(60 * 60)
+          const { nickname, url, interval } = helper.monitorToAdd
+          const monitorId = await helper.addMonitorWithDataAsFirstUserAndReturnId({ nickname, url, interval: parseInt(interval) })
 
-          const {discordWebhook: {notify: preNotify}} = await helper.getMonitorById(monitorId)
-  
+          const { discordWebhook: { notify: preNotify } } = await helper.getMonitorById(monitorId)
+
           await api.patch(`/api/monitors/discordWebhook/${monitorId}`)
-            .send({notify: true})
-            .auth(firstUserToken, {type: 'bearer'})
+            .send({ notify: true })
+            .auth(firstUserToken, { type: 'bearer' })
             .expect(400)
-  
-          const {discordWebhook: {notify: postNotify}} = await helper.getMonitorById(monitorId)
-  
+
+          const { discordWebhook: { notify: postNotify } } = await helper.getMonitorById(monitorId)
+
           assert.strictEqual(postNotify, preNotify)
         })
       })
@@ -326,13 +327,13 @@ describe('When there are initially some users in the database', () => {
 
     describe('attempting to delete a monitor...', () => {
       test('succeeds with valid data', async () => {
-        const token = await helper.getBearerTokenOfFirstUser(60*60)
+        const token = await helper.getBearerTokenOfFirstUser(60 * 60)
         const monitorToDelete = await helper.getSpecificFirstUserMonitor()
 
         const monitorsBefore = await helper.monitorsInDb()
 
         await api.delete(`/api/monitors/${monitorToDelete._id.toString()}`)
-          .auth(token, {type: 'bearer'})
+          .auth(token, { type: 'bearer' })
           .expect(410)
 
         const monitorsAfter = await helper.monitorsInDb()
@@ -340,13 +341,13 @@ describe('When there are initially some users in the database', () => {
       })
 
       test('fails and returns 401 when attempting to delete another users monitor', async () => {
-        const token = await helper.getBearerTokenOfFirstUser(60*60)
+        const token = await helper.getBearerTokenOfFirstUser(60 * 60)
         const monitorToDelete = await helper.getSpecificSecondUserMonitor()
 
         const monitorsBefore = await helper.monitorsInDb()
 
         await api.delete(`/api/monitors/${monitorToDelete._id.toString()}`)
-          .auth(token, {type: 'bearer'})
+          .auth(token, { type: 'bearer' })
           .expect(401)
 
         const monitorsAfter = await helper.monitorsInDb()
@@ -354,10 +355,10 @@ describe('When there are initially some users in the database', () => {
       })
 
       test('returns correct status and error with invalid object id', async () => {
-        const token = await helper.getBearerTokenOfFirstUser(60*60)
+        const token = await helper.getBearerTokenOfFirstUser(60 * 60)
 
         await api.delete('/api/monitors/123456788ghgh')
-          .auth(token, {type: 'bearer'})
+          .auth(token, { type: 'bearer' })
           .expect(400)
       })
     })
