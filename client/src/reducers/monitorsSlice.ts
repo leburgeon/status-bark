@@ -28,7 +28,7 @@ export const NewMonitorSchema = z.object({
 
 export type NewMonitorData = z.infer<typeof NewMonitorSchema>
 
-const initialState: {monitorsArray: Monitor[]} = {monitorsArray: []}
+const initialState: { monitorsArray: Monitor[] } = { monitorsArray: [] }
 
 const monitorSlice = createSlice({
   name: 'monitors',
@@ -42,7 +42,7 @@ const monitorSlice = createSlice({
     },
     updateMonitor: (state, action: PayloadAction<Monitor>) => {
       state.monitorsArray = state.monitorsArray.map(monitor => {
-        if (monitor.id !== action.payload.id){
+        if (monitor.id !== action.payload.id) {
           return monitor
         } else {
           return action.payload
@@ -59,7 +59,7 @@ const monitorSlice = createSlice({
   }
 })
 
-export const {setMonitors, clearMonitors, addMonitor, removeMonitor, updateMonitor} = monitorSlice.actions
+export const { setMonitors, clearMonitors, addMonitor, removeMonitor, updateMonitor } = monitorSlice.actions
 
 export const createMonitor = (data: NewMonitorData) => {
   return async (dispatch: Dispatch) => {
@@ -69,7 +69,7 @@ export const createMonitor = (data: NewMonitorData) => {
       dispatch(addMonitor(newMonitor))
     } catch (error: unknown) {
       let errorMessage = 'Error creating monitor'
-      if (error instanceof Error){
+      if (error instanceof Error) {
         errorMessage += error.message
       }
       dispatch(showError(errorMessage))
@@ -78,14 +78,14 @@ export const createMonitor = (data: NewMonitorData) => {
 }
 
 export const initialiseMonitors = () => {
-  return async (dispatch:Dispatch) => {
+  return async (dispatch: Dispatch) => {
     try {
       const response = await monitorService.getMonitors()
       const monitorsArray = MonitorSchema.array().parse(response.data)
       dispatch(setMonitors(monitorsArray))
     } catch (error) {
       let errorMessage = 'Error fetching monitors'
-      if (error instanceof Error){
+      if (error instanceof Error) {
         errorMessage += error.message
       }
       dispatch(showError(errorMessage))
@@ -100,7 +100,7 @@ export const deleteMonitor = (id: string) => {
       dispatch(removeMonitor(id))
     } catch (error) {
       let errorMessage = 'Error deleting monitor'
-      if (error instanceof Error){
+      if (error instanceof Error) {
         errorMessage += error.message
       }
       dispatch(showError(errorMessage))
@@ -108,7 +108,7 @@ export const deleteMonitor = (id: string) => {
   }
 }
 
-export const sendWebhookPatchAndUpdateMonitor = (id: string, data: {notify: boolean, unEncryptedWebhook?: string | null}) => {
+export const sendWebhookPatchAndUpdateMonitor = (id: string, data: { notify?: boolean, unEncryptedWebhook?: string | null }) => {
   return async (dispatch: Dispatch) => {
     dispatch(setFetching(true))
     try {
@@ -127,16 +127,16 @@ export const sendWebhookPatchAndUpdateMonitor = (id: string, data: {notify: bool
   }
 }
 
-export const sendMonitorPatchAndUpdateMonitor = (id: string, data: {nickname: string, url: string, interval: number}) => {
+export const sendMonitorPatchAndUpdateMonitor = (id: string, data: { nickname: string, url: string, interval: number }) => {
   return async (dispatch: Dispatch) => {
     dispatch(setFetching(true))
     try {
       const response = await monitorService.patchMonitor(id, data)
       const updatedMonitor = MonitorSchema.parse(response.data)
       dispatch(updateMonitor(updatedMonitor))
-    } catch (error){
+    } catch (error) {
       let errorMessage = 'Error updating monitor info'
-      if (error instanceof Error){
+      if (error instanceof Error) {
         errorMessage += error.message
       }
       dispatch(showError(errorMessage))

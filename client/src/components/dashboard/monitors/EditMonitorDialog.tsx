@@ -8,11 +8,12 @@ import { Monitor } from "../../../reducers/monitorsSlice"
 interface EditMonitorDialogProps {
   open: boolean,
   onClose: () => void,
-  onSubmit: (data: {url: string, interval: number, nickname: string}, id: string) => void,
-  selectedMonitor: Monitor | null
+  onSubmit: (data: { url: string, interval: number, nickname: string }, id: string) => void,
+  selectedMonitor: Monitor | null,
+  openWebhookDialog: () => void
 }
 
-const EditMonitorDialog = ({ open, onClose, onSubmit, selectedMonitor }: EditMonitorDialogProps) => {
+const EditMonitorDialog = ({ open, onClose, onSubmit, selectedMonitor, openWebhookDialog }: EditMonitorDialogProps) => {
   const [nickname, setNickname] = useState('')
   const [url, setUrl] = useState('')
   const [interval, setInterval] = useState(0)
@@ -20,7 +21,7 @@ const EditMonitorDialog = ({ open, onClose, onSubmit, selectedMonitor }: EditMon
   const [urlError, setUrlError] = useState('')
 
   useEffect(() => {
-    if (open && selectedMonitor){
+    if (open && selectedMonitor) {
       setNickname(selectedMonitor.nickname)
       setUrl(selectedMonitor.url)
       setInterval(selectedMonitor.interval)
@@ -72,7 +73,10 @@ const EditMonitorDialog = ({ open, onClose, onSubmit, selectedMonitor }: EditMon
     onClose()
   }
 
-
+  const handleOpenWebhookDialog = () => {
+    openWebhookDialog()
+    onClose()
+  }
   return (
     <Dialog
       open={open}
@@ -81,7 +85,7 @@ const EditMonitorDialog = ({ open, onClose, onSubmit, selectedMonitor }: EditMon
     >
       <DialogTitle sx={{ fontWeight: 700, fontSize: '1.5rem', color: 'primary.main', letterSpacing: 2 }}>Edit Monitor</DialogTitle>
       <form onSubmit={handleSubmit}>
-        <DialogContent>
+        <DialogContent sx={{ paddingBottom: 1 }}>
           <Stack spacing={2}>
             <TextField
               label="Nickname"
@@ -111,11 +115,40 @@ const EditMonitorDialog = ({ open, onClose, onSubmit, selectedMonitor }: EditMon
               required
               fullWidth
             />
+            <Button
+              onClick={handleOpenWebhookDialog}
+              sx={{
+                paddingBottom: 0,
+                alignSelf: 'center',
+                fontWeight: 700,
+                fontSize: '1.1rem',
+                color: 'primary.main',
+                background: 'none',
+                boxShadow: 'none',
+                cursor: 'pointer',
+                '&:hover': {
+                  boxShadow: 'none',
+                  background: 'none',
+                },
+                '&:focus': {
+                  boxShadow: 'none',
+                  background: 'none',
+                },
+                '&:active': {
+                  boxShadow: 'none',
+                  background: 'none',
+                },
+              }}
+            >
+              {selectedMonitor?.discordWebhook.urlPresent
+                ? 'Update discord webhook'
+                : 'Add discord webhook'}
+            </Button>
           </Stack>
         </DialogContent>
         <DialogActions sx={{ justifyContent: 'center' }}>
           <Button onClick={onClose} color="secondary" variant="outlined" sx={{ borderRadius: 2 }}>Cancel</Button>
-          <Button disabled={selectedMonitor === null || (nickname === selectedMonitor.nickname && url === selectedMonitor.url && interval === selectedMonitor.interval) } type="submit" color="primary" variant="contained" sx={{ borderRadius: 2, fontWeight: 600, minWidth: 100 }}>Save</Button>
+          <Button disabled={selectedMonitor === null || (nickname === selectedMonitor.nickname && url === selectedMonitor.url && interval === selectedMonitor.interval)} type="submit" color="primary" variant="contained" sx={{ borderRadius: 2, fontWeight: 600, minWidth: 100 }}>Save</Button>
         </DialogActions>
       </form>
     </Dialog>

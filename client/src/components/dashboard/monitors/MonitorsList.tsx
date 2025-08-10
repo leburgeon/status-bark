@@ -4,9 +4,9 @@ import { useAppDispatch, useAppSelector } from "../../../hooks"
 import Monitor from "./MonitorListItem"
 import AddMonitorDialog from './AddMonitorDialog'
 import DeleteMonitorDialog from './DeleteMonitorDialog'
-import { createMonitor, initialiseMonitors, deleteMonitor, NewMonitorData, Monitor as MonitorType, sendMonitorPatchAndUpdateMonitor } from '../../../reducers/monitorsSlice'
+import { createMonitor, initialiseMonitors, deleteMonitor, NewMonitorData, Monitor as MonitorType, sendMonitorPatchAndUpdateMonitor, sendWebhookPatchAndUpdateMonitor } from '../../../reducers/monitorsSlice'
 import EditMonitorDialog from './EditMonitorDialog'
-import UpdateWebhookDialog from './UpdateWebhookDialog'
+import AddOrUpdateWebhookDialog from './AddOrUpdateWebhookDialog'
 
 const MonitorsList = () => {
   const monitors = useAppSelector(store => store.monitors.monitorsArray)
@@ -14,6 +14,7 @@ const MonitorsList = () => {
   const [newDialogOpen, setNewDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [webhookDialogOpen, setWebhookDialogOpen] = useState(true)
 
   const [selectedMonitor, setSelectedMonitor] = useState<MonitorType | null>(null)
   const dispatch = useAppDispatch()
@@ -49,8 +50,16 @@ const MonitorsList = () => {
   }
 
   // Handles the submition of the edit for the monitor
-  const handleSubmitEdit = (data: {url: string, interval: number, nickname: string}, id: string) => {
+  const handleSubmitEdit = (data: { url: string, interval: number, nickname: string }, id: string) => {
     dispatch(sendMonitorPatchAndUpdateMonitor(id, data))
+    setEditDialogOpen(false)
+    setSelectedMonitor(null)
+  }
+
+  // Handles submitting an edit for the webhook
+  const handleSubmitWebhookEdit = (data: { unEncryptedWebhook: string | null }, id: string) => {
+    dispatch(sendWebhookPatchAndUpdateMonitor(id, data))
+    setWebhookDialogOpen(false)
     setEditDialogOpen(false)
     setSelectedMonitor(null)
   }
@@ -72,7 +81,7 @@ const MonitorsList = () => {
             <Typography color="text.secondary" align="center">No monitors yet. Add one below!</Typography>
           ) : (
             monitors.map(monitor => <Fade in key={monitor.id}><Box>
-              <Monitor 
+              <Monitor
                 {...monitor}
                 onDeleteClick={() => handleDeleteClick(monitor)}
                 onEditClick={() => handleEditClick(monitor)}
@@ -94,10 +103,10 @@ const MonitorsList = () => {
         </Box>
       </Paper>
 
-      <AddMonitorDialog 
-        open={newDialogOpen} 
-        onClose={() => setNewDialogOpen(false)} 
-        onAdd={handleAddMonitor} 
+      <AddMonitorDialog
+        open={newDialogOpen}
+        onClose={() => setNewDialogOpen(false)}
+        onAdd={handleAddMonitor}
       />
 
       <DeleteMonitorDialog
@@ -111,10 +120,17 @@ const MonitorsList = () => {
         open={editDialogOpen}
         onClose={() => setEditDialogOpen(false)}
         onSubmit={handleSubmitEdit}
-        selectedMonitor={selectedMonitor}  
+        selectedMonitor={selectedMonitor}
+        openWebhookDialog={() => setWebhookDialogOpen(true)}
       />
 
-      <UpdateWebhookDialog/>
+      <AddOrUpdateWebhookDialog
+        open={webhookDialogOpen}
+        onClose={() => {
+          setWebhookDialogOpen(false)
+        }}
+        selectedMonitor={selectedMonitor}
+        onSubmit={handleSubmitWebhookEdit} />
     </Box>
   )
 }
