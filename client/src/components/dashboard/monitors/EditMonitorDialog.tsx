@@ -75,7 +75,6 @@ const EditMonitorDialog = ({ open, onClose, onSubmit, selectedMonitor, openWebho
 
   const handleOpenWebhookDialog = () => {
     openWebhookDialog()
-    onClose()
   }
   return (
     <Dialog

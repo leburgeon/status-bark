@@ -14,7 +14,7 @@ const MonitorsList = () => {
   const [newDialogOpen, setNewDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
-  const [webhookDialogOpen, setWebhookDialogOpen] = useState(true)
+  const [webhookDialogOpen, setWebhookDialogOpen] = useState(false)
 
   const [selectedMonitor, setSelectedMonitor] = useState<MonitorType | null>(null)
   const dispatch = useAppDispatch()
@@ -70,7 +70,8 @@ const MonitorsList = () => {
 
   return (
 
-    <Box sx={{ maxWidth: 700, mx: 'auto', mt: 6, mb: 4 }}>
+    // allow horizontal scroll on very small screens so minWidth on items won't overlap
+    <Box sx={{ maxWidth: 700, mx: 'auto', mt: 6, mb: 4, overflowX: 'auto' }}>
 
       <Paper elevation={4} sx={{ p: 4, borderRadius: 3, background: 'linear-gradient(145deg, #141414, #1e1e1e)' }}>
         <Typography variant="h2" sx={{ mb: 3, textAlign: 'center', letterSpacing: 2, color: 'primary.main', fontWeight: 700 }}>
